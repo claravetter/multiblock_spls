@@ -1,0 +1,168 @@
+<deployment-project plugin="plugin.ezdeploy" plugin-version="1.0">
+  <configuration build-checksum="2514667259" file="/volume/DP_FEF/ScrFun/ScriptsRepository/SPLS_Toolbox_Dev_2023/bootstrap.prj" location="/volume/DP_FEF/ScrFun/ScriptsRepository/SPLS_Toolbox_Dev_2023" name="bootstrap" preferred-package-location="/volume/DP_FEF/ScrFun/ScriptsRepository/SPLS_Toolbox_Dev_2023/bootstrap/for_redistribution" preferred-package-type="package.type.install" target="target.ezdeploy.standalone" target-name="Application Compiler">
+    <param.appname>bootstrap</param.appname>
+    <param.icon />
+    <param.icons />
+    <param.version>1.0</param.version>
+    <param.authnamewatermark>David Popovic</param.authnamewatermark>
+    <param.email>david.popovic@med.uni-muenchen.de</param.email>
+    <param.company>KUM</param.company>
+    <param.summary />
+    <param.description />
+    <param.screenshot />
+    <param.guid />
+    <param.installpath.string>/KUM/bootstrap/</param.installpath.string>
+    <param.installpath.combo>option.installpath.user</param.installpath.combo>
+    <param.logo />
+    <param.install.notes />
+    <param.target.install.notes>In the following directions, replace MR/v912 by the directory on the target machine where MATLAB is installed, or MR by the directory where the MATLAB Runtime is installed.
+
+(1) Set the environment variable XAPPLRESDIR to this value:
+
+MR/v912/X11/app-defaults
+
+
+(2) If the environment variable LD_LIBRARY_PATH is undefined, set it to the following:
+
+MR/v912/runtime/glnxa64:MR/v912/bin/glnxa64:MR/v912/sys/os/glnxa64:MR/v912/sys/opengl/lib/glnxa64
+
+If it is defined, set it to the following:
+
+${LD_LIBRARY_PATH}:MR/v912/runtime/glnxa64:MR/v912/bin/glnxa64:MR/v912/sys/os/glnxa64:MR/v912/sys/opengl/lib/glnxa64</param.target.install.notes>
+    <param.intermediate>${PROJECT_ROOT}/bootstrap/for_testing</param.intermediate>
+    <param.files.only>${PROJECT_ROOT}/bootstrap/for_redistribution_files_only</param.files.only>
+    <param.output>${PROJECT_ROOT}/bootstrap/for_redistribution</param.output>
+    <param.logdir>${PROJECT_ROOT}/bootstrap</param.logdir>
+    <param.enable.clean.build>false</param.enable.clean.build>
+    <param.user.defined.mcr.options />
+    <param.target.type>subtarget.standalone</param.target.type>
+    <param.support.packages />
+    <param.web.mcr>true</param.web.mcr>
+    <param.package.mcr>false</param.package.mcr>
+    <param.no.mcr>false</param.no.mcr>
+    <param.web.mcr.name>MyAppInstaller_web</param.web.mcr.name>
+    <param.package.mcr.name>MyAppInstaller_mcr</param.package.mcr.name>
+    <param.no.mcr.name>MyAppInstaller_app</param.no.mcr.name>
+    <param.windows.command.prompt>false</param.windows.command.prompt>
+    <param.create.log>false</param.create.log>
+    <param.log.file />
+    <param.native.matlab>false</param.native.matlab>
+    <param.checkbox>false</param.checkbox>
+    <param.example />
+    <param.help.text>Syntax 
+	 dp_ICV_bootstrap_csv -? 
+	 dp_ICV_bootstrap_csv i analysis_folder 
+ Input Arguments 
+	 -?  print help on how to use the application 
+	 i analysis_folder  input arguments</param.help.text>
+    <unset>
+      <param.icon />
+      <param.icons />
+      <param.version />
+      <param.authnamewatermark />
+      <param.email />
+      <param.company />
+      <param.summary />
+      <param.description />
+      <param.screenshot />
+      <param.guid />
+      <param.installpath.string />
+      <param.installpath.combo />
+      <param.logo />
+      <param.install.notes />
+      <param.intermediate />
+      <param.files.only />
+      <param.output />
+      <param.logdir />
+      <param.enable.clean.build />
+      <param.user.defined.mcr.options />
+      <param.target.type />
+      <param.support.packages />
+      <param.web.mcr />
+      <param.package.mcr />
+      <param.no.mcr />
+      <param.web.mcr.name />
+      <param.package.mcr.name />
+      <param.no.mcr.name />
+      <param.windows.command.prompt />
+      <param.create.log />
+      <param.log.file />
+      <param.native.matlab />
+      <param.checkbox />
+      <param.example />
+    </unset>
+    <fileset.main>
+      <file>/volume/projects/DP_FEF/ScrFun/ScriptsRepository/SPLS_Toolbox/dp_ICV_bootstrap_csv.m</file>
+    </fileset.main>
+    <fileset.resources />
+    <fileset.package />
+    <fileset.depfun>
+      <file>/opt/NM/NeuroMiner_1.1/NeuroMiner_1.1/preproc/nk_PartialCorrelationsObj.m</file>
+      <file>/volume/DP_FEF/ScrFun/ScriptsRepository/ComBat/aprior.m</file>
+      <file>/volume/DP_FEF/ScrFun/ScriptsRepository/ComBat/bprior.m</file>
+      <file>/volume/DP_FEF/ScrFun/ScriptsRepository/ComBat/combat.m</file>
+      <file>/volume/DP_FEF/ScrFun/ScriptsRepository/ComBat/itSol.m</file>
+      <file>/volume/DP_FEF/ScrFun/ScriptsRepository/ComBat/postmean.m</file>
+      <file>/volume/DP_FEF/ScrFun/ScriptsRepository/ComBat/postvar.m</file>
+      <file>/volume/projects/DP_FEF/ScrFun/ScriptsRepository/SPLS_Toolbox/dp_corrections.m</file>
+      <file>/volume/projects/DP_FEF/ScrFun/ScriptsRepository/SPLS_Toolbox/dp_correctscale.m</file>
+      <file>/volume/projects/DP_FEF/ScrFun/ScriptsRepository/SPLS_Toolbox/dp_master_correctscale.m</file>
+      <file>/volume/projects/DP_FEF/ScrFun/ScriptsRepository/SPLS_Toolbox/dp_projection.m</file>
+      <file>/volume/projects/DP_FEF/ScrFun/ScriptsRepository/SPLS_Toolbox/dp_spls.m</file>
+      <file>/volume/projects/DP_FEF/ScrFun/ScriptsRepository/SPLS_Toolbox/dp_spls_full.m</file>
+      <file>/volume/projects/DP_FEF/ScrFun/ScriptsRepository/SPLS_Toolbox/dp_standardize.m</file>
+      <file>/volume/projects/DP_FEF/ScrFun/ScriptsRepository/SPLS_Toolbox/dp_standardize_comb.m</file>
+    </fileset.depfun>
+    <build-deliverables>
+      <file location="${PROJECT_ROOT}/bootstrap/for_testing" name="readme.txt" optional="true">/volume/DP_FEF/ScrFun/ScriptsRepository/SPLS_Toolbox_Dev_2023/bootstrap/for_testing/readme.txt</file>
+      <file location="${PROJECT_ROOT}/bootstrap/for_testing" name="bootstrap" optional="false">/volume/DP_FEF/ScrFun/ScriptsRepository/SPLS_Toolbox_Dev_2023/bootstrap/for_testing/bootstrap</file>
+      <file location="${PROJECT_ROOT}/bootstrap/for_testing" name="splash.png" optional="false">/volume/DP_FEF/ScrFun/ScriptsRepository/SPLS_Toolbox_Dev_2023/bootstrap/for_testing/splash.png</file>
+      <file location="${PROJECT_ROOT}/bootstrap/for_testing" name="run_bootstrap.sh" optional="false">/volume/DP_FEF/ScrFun/ScriptsRepository/SPLS_Toolbox_Dev_2023/bootstrap/for_testing/run_bootstrap.sh</file>
+    </build-deliverables>
+    <workflow />
+    <matlab>
+      <root>/opt/matlab/R2022a</root>
+      <toolboxes>
+        <toolbox name="matlabcoder" />
+        <toolbox name="embeddedcoder" />
+        <toolbox name="fixedpoint" />
+        <toolbox name="neuralnetwork" />
+      </toolboxes>
+      <toolbox>
+        <matlabcoder>
+          <enabled>true</enabled>
+        </matlabcoder>
+      </toolbox>
+      <toolbox>
+        <embeddedcoder>
+          <enabled>true</enabled>
+        </embeddedcoder>
+      </toolbox>
+      <toolbox>
+        <fixedpoint>
+          <enabled>true</enabled>
+        </fixedpoint>
+      </toolbox>
+      <toolbox>
+        <neuralnetwork>
+          <enabled>true</enabled>
+        </neuralnetwork>
+      </toolbox>
+    </matlab>
+    <platform>
+      <unix>true</unix>
+      <mac>false</mac>
+      <windows>false</windows>
+      <win2k>false</win2k>
+      <winxp>false</winxp>
+      <vista>false</vista>
+      <linux>true</linux>
+      <solaris>false</solaris>
+      <osver>3.10.0-1062.18.1.el7.x86_64</osver>
+      <os32>false</os32>
+      <os64>true</os64>
+      <arch>glnxa64</arch>
+      <matlab>true</matlab>
+    </platform>
+  </configuration>
+</deployment-project>
