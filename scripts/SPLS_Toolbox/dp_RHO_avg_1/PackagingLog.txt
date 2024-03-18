@@ -1,0 +1,23 @@
+ant:
+<ant>
+  <mkdir dir="/volume/DP_FEF/ScrFun/ScriptsRepository/SPLS_Toolbox/dp_RHO_avg_1/for_redistribution" />
+  <mkdir dir="/volume/DP_FEF/ScrFun/ScriptsRepository/SPLS_Toolbox/dp_RHO_avg_1/for_testing" />
+  <mkdir dir="/volume/DP_FEF/ScrFun/ScriptsRepository/SPLS_Toolbox/dp_RHO_avg_1/for_redistribution_files_only" />
+</ant>
+mcc -o dp_RHO_avg_1 -W main:dp_RHO_avg_1 -T link:exe -d /volume/DP_FEF/ScrFun/ScriptsRepository/SPLS_Toolbox/dp_RHO_avg_1/for_testing -v /volume/DP_FEF/ScrFun/ScriptsRepository/SPLS_Toolbox/dp_RHO_avg_k_AR.m -a /volume/DP_FEF/ScrFun/ScriptsRepository/SPLS_Toolbox/dp_partition_holdout.m -a /volume/DP_FEF/Doc/SPLS/spls.m 
+[Warning: MATLAB Toolbox Path Cache is out of date and is not being used.
+Type 'help toolbox_path_cache' for more info] 
+Compiler version: 6.0 (R2015a)
+Dependency analysis by REQUIREMENTS.
+[Warning: Adding path "/volume/DP_FEF/ScrFun/ScriptsRepository/SPLS_Toolbox" to
+Compiler path instance.] 
+Parsing file "/volume/DP_FEF/ScrFun/ScriptsRepository/SPLS_Toolbox/dp_RHO_avg_k_AR.m"
+	(Referenced from: "Compiler Command Line").
+Deleting 0 temporary MEX authorization files.
+Generating file "/volume/DP_FEF/ScrFun/ScriptsRepository/SPLS_Toolbox/dp_RHO_avg_1/for_testing/readme.txt".
+Generating file "/volume/DP_FEF/ScrFun/ScriptsRepository/SPLS_Toolbox/dp_RHO_avg_1/for_testing/run_dp_RHO_avg_1.sh".
+Packaging...
+Creating the bundle...
+Web based installer created at /volume/DP_FEF/ScrFun/ScriptsRepository/SPLS_Toolbox/dp_RHO_avg_1/for_redistribution/MyAppInstaller_web.install.
+Packaging complete.
+Elapsed packaging time was: 1 minutes and 15 seconds.

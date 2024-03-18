@@ -1,0 +1,21 @@
+ant:
+<ant>
+  <mkdir dir="/volume/DP_FEF/ScrFun/ScriptsRepository/SPLS_Toolbox/Permutation/dp_perm_testing/for_redistribution" />
+  <mkdir dir="/volume/DP_FEF/ScrFun/ScriptsRepository/SPLS_Toolbox/Permutation/dp_perm_testing/for_testing" />
+  <mkdir dir="/volume/DP_FEF/ScrFun/ScriptsRepository/SPLS_Toolbox/Permutation/dp_perm_testing/for_redistribution_files_only" />
+</ant>
+mcc -o dp_perm_testing -W main:dp_perm_testing -T link:exe -d /volume/DP_FEF/ScrFun/ScriptsRepository/SPLS_Toolbox/Permutation/dp_perm_testing/for_testing -v /volume/DP_FEF/ScrFun/ScriptsRepository/SPLS_Toolbox/dp_perm_testing.m 
+Compiler version: 6.0 (R2015a)
+Dependency analysis by REQUIREMENTS.
+[Warning: Adding path "/volume/DP_FEF/ScrFun/ScriptsRepository/SPLS_Toolbox" to
+Compiler path instance.] 
+Parsing file "/volume/DP_FEF/ScrFun/ScriptsRepository/SPLS_Toolbox/dp_perm_testing.m"
+	(Referenced from: "Compiler Command Line").
+Deleting 0 temporary MEX authorization files.
+Generating file "/volume/DP_FEF/ScrFun/ScriptsRepository/SPLS_Toolbox/Permutation/dp_perm_testing/for_testing/readme.txt".
+Generating file "/volume/DP_FEF/ScrFun/ScriptsRepository/SPLS_Toolbox/Permutation/dp_perm_testing/for_testing/run_dp_perm_testing.sh".
+Packaging...
+Creating the bundle...
+Web based installer created at /volume/DP_FEF/ScrFun/ScriptsRepository/SPLS_Toolbox/Permutation/dp_perm_testing/for_redistribution/MyAppInstaller_web.install.
+Packaging complete.
+Elapsed packaging time was: 43 seconds.

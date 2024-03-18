@@ -1,0 +1,15 @@
+function d = ssqd(a)
+% Computes pairwise sum of squared differences between rows of X
+% Use squareform(.) to convert to square symmetric distance matrix
+    [N,M] = size(a);
+    d = zeros(M*(M-1)/2,1);
+    k = 1;
+    for i = 1:M-1
+            ssq = zeros(1, M-i);
+            for j = 1:N
+                ssq = ssq + (a(j, i) - a(j,(i+1):M)).^2;
+            end
+            d(k:(k+M-i-1)) = ssq;
+            k = k + (M-i);
+    end
+end

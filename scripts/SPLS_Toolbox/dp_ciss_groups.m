@@ -1,0 +1,101 @@
+%% DP script for CISS differences
+
+%% new script to compute CISS group differences
+
+m_discovery = matfile('/volume/HCStress/Analysis/02-Jul-2020/CISS_636_IQRadd_NCV55_single_folds_bestmerge_noval_min10_2020_5000AUC_Dev/final_results/result_final_vis.mat', 'Writable', true);
+% m_replication = matfile('/volume/HCStress/Analysis/25-Feb-2020_CTQ_627_replication_sample_CTQ_fixed_datafile.mat', 'Writable', true);
+
+input_discovery = m_discovery.input;
+% input_replication = m_replication.input;
+
+output_discovery = m_discovery.output;
+
+% load('/volume/HCStress/Analysis/replication_results_SPLS_Stress/validation_replication_detailed_results_comb_app_1.mat')
+
+% get CTQ data and compute total and subscale scores
+CISS=struct;
+% CISS.total = 1:24;
+CISS.task = [5,9,12,14,15,19,23,24];
+CISS.emotion = [2,3,7,8,11,13,16,21];
+CISS.avoidance_distraction = [4,6,10,22];
+CISS.social_diversion = [1,17,18,20];
+CISS_collection_discovery = input_discovery.behavior;
+CISS_collection_discovery_names = input_discovery.behavior_names;
+CISS_collection_discovery(:, [CISS.task, CISS.emotion, CISS.avoidance_distraction, CISS.social_diversion]) = input_discovery.behavior(:, 1:24);
+CISS_collection_discovery_names(:, [CISS.task, CISS.emotion, CISS.avoidance_distraction, CISS.social_diversion]) = input_discovery.behavior_names(1:24);
+CISS_discovery=[];CISS_replication=[]; 
+fields = fieldnames(CISS);
+for i=1:size(fields,1)
+    CISS_discovery(:,i) = sum(CISS_collection_discovery(:, CISS.(fields{i})),2);
+    CISS_discovery_names{1,i} = fields{i};
+%     CISS_replication(:,i) = sum(CTQ_collection_replication(:, CTQ.(fields{i})),2);
+end
+
+% input_replication.CISS_collection = CISS_replication;
+% input_replication.CISS_collection_names = fieldnames(CTQ)';
+output_discovery.CISS_collection = CISS_discovery;
+output_discovery.CISS_collection_names = fieldnames(CISS)';
+
+m_discovery.input = input_discovery;
+% m_replication.input = input_replication;
+m_discovery.output = output_discovery;
+
+
+labels= {'CHR', 'HC', 'ROD', 'ROP'};
+labels_disc = zeros(size(input_discovery.data_collection.Labels,1),1);
+% labels_rep = ones(size(input_replication.data_collection.Labels,1),1);
+CISS_results=[];temp_results=[];mean_std_results=[];temp_mean_std=[];
+
+for i=1:size(CISS_discovery,2)
+%     temp_results=[];temp_mean_std=[];
+%     temp_data = [CISS_discovery(:,i); CISS_replication(:,i)];    
+%     [p,tbl,stats] = kruskalwallis(temp_data, [labels_disc; labels_rep]);
+%     temp_results = [temp_results, p];
+    temp_mean_std = [nanmean(CISS_discovery(:,i)); nanstd(CISS_discovery(:,i))];
+%     close all
+    for ii=1:size(labels,2)
+        log_temp_d = contains(input_discovery.data_collection.Labels, labels{ii});
+%         log_temp_r = contains(input_replication.data_collection.Labels, labels{ii});
+        temp_data = CISS_discovery(log_temp_d,i);
+        temp_mean_std = [temp_mean_std, [nanmean(CISS_discovery(log_temp_d,i)); nanstd(CISS_discovery(log_temp_d,i))]];
+%         [p,tbl,stats] = kruskalwallis(temp_data, [labels_disc(log_temp_d); labels_rep(log_temp_r)]);
+%         temp_results = [temp_results, p];
+    end
+%     CISS_results = [CISS_results; temp_results];
+    mean_std_results = [mean_std_results; temp_mean_std];
+%     close all
+end
+
+mean_std_results_names = CISS_discovery_names';
+% 
+% [CISS_results, ~] = dp_FDR_adj(CISS_results);
+
+groups_to_choose = labels;
+log_groups_disc = contains(input_discovery.data_collection.Labels, groups_to_choose);
+% log_groups_rep = contains(input_replication.data_collection.Labels, groups_to_choose);
+CISS_discovery_results_KW=[];CISS_discovery_results_Dunn=[];
+% CTQ_replication_results_KW=[];CTQ_replication_results_Dunn=[];
+
+for i=1:size(CISS_discovery,2)
+    [p,tbl,stats] = kruskalwallis(CISS_discovery(log_groups_disc,i), input_discovery.data_collection.Labels(log_groups_disc));
+    CISS_discovery_results_KW(i,:) = [p, tbl{2,5}, tbl{2,3}];
+    CISS_discovery_results_Dunn{i,1} = multcompare(stats, 'Estimate', 'kruskalwallis', 'CType', 'dunn-sidak');
+    close all
+    
+%     [p,tbl,stats] = kruskalwallis(CISS_replication(log_groups_rep,i), input_replication.data_collection.Labels(log_groups_rep));
+%     CTQ_replication_results_KW(i,:) = [p, tbl{2,5}, tbl{2,3}];
+%     CTQ_replication_results_Dunn{i,1} = multcompare(stats, 'Estimate', 'kruskalwallis', 'CType', 'dunn-sidak');
+    
+%     close all
+    
+    %    CTQ_discovery_results = [CTQ_discovery_results,
+end
+
+[CISS_discovery_results_KW(:,1), ~] = dp_FDR_adj(CISS_discovery_results_KW(:,1));
+% [CISS_replication_results_KW(:,1), ~] = dp_FDR_adj(CISS_replication_results_KW(:,1));
+    
+    
+    
+    
+    
+
