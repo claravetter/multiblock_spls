@@ -1,26 +1,36 @@
 %% DP function to set up parameters
 
-function [input, setup, X, Y, B, K, W, OB, IB, size_sets_permutation, size_sets_bootstrap, correlation_method, cs_method, selection_train, selection_retrain, correction_target] = dp_setup_parameters(input, setup)
+function [input, setup, matrices, X, Y, B, K, W, OB, IB, size_sets_permutation, size_sets_bootstrap, correlation_method, cs_method, selection_train, selection_retrain, correction_target] = dp_setup_parameters(input, setup)
 
-if isfield(input, 'X')
-    try temp = load(input.X);
-        field = fieldnames(temp);
-        X = temp.(field{1});
-        clear('temp');
-    catch
-        X = input.X;
+% TO DO: check if paths are specified instead of matrices, cell fun 
+if isfield(input, 'matrices')
+    matrices = cellfun(@load_matrices,input.matrices, UniformOutput=false);
+    X = []; 
+    Y = [];
+else 
+    if isfield(input, 'X')
+        try temp = load(input.X);
+            % CV: what does this do?
+            field = fieldnames(temp);
+            X = temp.(field{1});
+            clear('temp');
+        catch
+            X = input.X;
+        end
     end
+
+    if isfield(input, 'Y')
+        try temp = load(input.Y);
+            field = fieldnames(temp);
+            Y = temp.(field{1});
+            clear('temp');
+        catch
+            Y = input.Y;
+        end
+    end
+    matrices = [];
 end
 
-if isfield(input, 'Y')
-    try temp = load(input.Y);
-        field = fieldnames(temp);
-        Y = temp.(field{1});
-        clear('temp');
-    catch
-        Y = input.Y;
-    end
-end
 
 if ~isfield(input, 'correct_limit')
     input.correct_limit=1;
@@ -145,4 +155,15 @@ if ~isfield(input, 'additional_NCV')
     input.additional_NCV = false;
 end
 
+end
+
+
+function matrix = load_matrices(matrix)
+try temp = load(matrix);
+    field = fieldnames(temp);
+    matrix = temp.(field{1});
+    clear('temp');
+catch
+    matrix = matrix;
+end
 end

@@ -6,7 +6,7 @@ switch IN.type % 1 = nested cross-validation, 2 = random hold-out splits, 3 = LS
     case 1
         try
             CV.cv_outer_indices = struct;
-            CV.cv_outer_indices = nk_CVpartition2(IN.OB, IN.OF, IN.labels);
+            CV.cv_outer_indices = nk_CVpartition(IN.OB, IN.OF, IN.labels);
         catch
             disp(['Not enough subjects for nested cross-validation with ', num2str(IN.OF), ' outer folds']);
         end
@@ -14,7 +14,7 @@ switch IN.type % 1 = nested cross-validation, 2 = random hold-out splits, 3 = LS
             for w=1:IN.OF
                 CV.cv_outer_test_labels{ob,w} = IN.labels(CV.cv_outer_indices.TestInd{ob,w},:);
                 CV.cv_outer_train_labels{ob,w} = IN.labels(CV.cv_outer_indices.TrainInd{ob,w},:);
-                CV.cv_inner_indices{ob,w} = nk_CVpartition2(IN.IB, IN.IF, CV.cv_outer_train_labels{ob,w});
+                CV.cv_inner_indices{ob,w} = nk_CVpartition(IN.IB, IN.IF, CV.cv_outer_train_labels{ob,w});
             end
         end
         
