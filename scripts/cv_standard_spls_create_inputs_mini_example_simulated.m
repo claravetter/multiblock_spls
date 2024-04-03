@@ -1,12 +1,23 @@
 %% generalized sPLS Analysis: 
-% based on: volume/projects/RU_DP_immune/ScrFun/SPLS_data_prep_immune_07_2022.m
-% Date: 18.03.2024
+% simulated data
+% Date: 30.03.2024
 
-%% load PLEXUS test data
+%% simulate data
 clear all
-load('/Users/claravetter/local/Projects/mSPLS/20240131_testrun_realdata_mri_plexus_clinical/mri_plexus_clinical_matrices.mat')
+rng(42);
 
+% Number of samples and features
+numSamples = 100;
+numFeaturesX = 15;
+numFeaturesY = 20;
+numFeaturesZ = 10;
 
+% Generate random data matrices X, Y, Z
+X = randn(numSamples, numFeaturesX);
+Y = randn(numSamples, numFeaturesY);
+Z = randn(numSamples, numFeaturesZ);
+
+matrices = {X,Y,Z};
 %% Assign data for analysis in SPLS toolbox and create data and setup structure
 % Parameters for IT infrastructure
 setup.spls_standalone_path  = '/Users/claravetter/local/Code/multiblock_spls/'; % Path of the SPLS Toolboxsetup.date                  = date; % automatic date
@@ -14,7 +25,7 @@ setup.date                  = date; % automatic date
 setup.analysis_folder       = ['/Users/claravetter/local/Projects/mSPLS/', setup.date]; % analysis folder is created automatically using the current date
 setup.queue_name            = 'all.q'; % Choose queue for master and slave jobs, choose between psy0cf20 and mitnvp1-2 and all.q
 setup.email                 = 'clara.vetter@med.uni-muenchen.de'; % your email address
-setup.max_sim_jobs          = 40; % Define how many parallel jobs are created
+setup.max_sim_jobs          = 1; % Define how many parallel jobs are created
 setup.parallel_jobs         = 20; % Define how many jobs run in parallel at the same time (soft threshold)
 setup.mem_request           = 5; % Memory request for master and slave jobs, in GB, maybe decrease to 2 or 3
 setup.matlab_version        = 'R2022b'; % Define the runtime engine, currently its R2020b
@@ -23,7 +34,7 @@ setup.scratch_space         = '/Users/claravetter/local/Projects/mSPLS/nmcache/c
 setup.compilation_subpath   = 'for_testing'; % default
 
 % Accessory data input
-input.final_ID              = num2cell(1:267); % ID of your subjects (cell array)
+input.final_ID              = num2cell(1:size(matrices{1},1)); % ID of your subjects (cell array)
 %input.data_complete         = data_complete; % Optional, not needed for analysis: I store a large table of the entire sample in my files, mostly for post hoc analyses, 
 input.type_correction       = 'uncorrected'; % Define whether you want to correct for covariates, choose between: correct, uncorrected
 
@@ -31,15 +42,17 @@ input.type_correction       = 'uncorrected'; % Define whether you want to correc
 % should be corrected 
 input.correction_target     = 1; % Define whether you want to remove covariate effects from 1) X, 2) Y or 3) both matrices
 
-input.sites                 = ones(267,1); % Dummy coded vector for sites, if only one site, then enter a column vector of ones
+input.sites                 = ones(size(matrices{1},1),1); % Dummy coded vector for sites, if only one site, then enter a column vector of ones
 %input.sites_names           = input.data_complete.foranalysis.sites.Properties.VariableNames; % Names of the sites
 %input.covariates            = [covariate]; % [input.sites]; % Matrix with covariates (double)
 %input.covariates_names      = [covariate_name]; % Names of covariates (cell array)
-input.Diag                  = [ones(150,1); ones(117,1)+1]; % input.data_complete.foranalysis.basic{PSN_MRI_final, 'DiagNum'}; % Column vector with diagnoses coded via numbers, i.e., [1 3 2 3 4 ]
-input.DiagNames             = num2cell(input.Diag); % input.data_complete.foranalysis.basic{input.Y_final.Properties.RowNames, 'Labels'}; % Column cell array with diagnoses/labels, i.e., {'HC', 'ROD', 'CHR', 'HC', 'ROP'}
+input.Diag                  = [ones(size(matrices{1},1)-floor(0.5*(size(matrices{1},1))),1); ones(size(matrices{1},1) - (size(matrices{1},1)-floor(0.5*(size(matrices{1},1)))),1)+1]; % input.data_complete.foranalysis.basic{PSN_MRI_final, 'DiagNum'}; % Column vector with diagnoses coded via numbers, i.e., [1 3 2 3 4 ]
+input.DiagNames             = cellstr("group" + input.Diag); % input.data_complete.foranalysis.basic{input.Y_final.Properties.RowNames, 'Labels'}; % Column cell array with diagnoses/labels, i.e., {'HC', 'ROD', 'CHR', 'HC', 'ROP'}
 
 % define X and Y
 % TO DO: change to matrices (cell array)
+input.X = X; 
+input.Y = Y;
 input.matrices              = matrices; % 1st data matrix, usually for MRI/biological data, if applicable. If MRI data, then either put in the path to a Matlab file, containing only one variable with vectorized MRI data, or put in vectorized MRI data itself, otherwise just put in the matrix (double format)
 input.matrix_names               = []; % define names of features in X, if MRI data, or no names applicable, leave empty
 %input.Y                     = Y_final.Variables; % 2nd data matrix, usually for behavioral/phenotypical data (double format) 
@@ -48,13 +61,13 @@ input.matrix_names               = []; % define names of features in X, if MRI d
 
 % Define ML framework
 input.framework             = 1; % Cross-validation setup: 1 = nested cross-validation, 2 = random hold-out splits, 3 = LOSOCV, 4 = random split-half
-input.outer_folds           = 5; % Applicable only for nested cross-validation and Random Hold-Out Splits: Define Outer folds CV2
+input.outer_folds           = 2; % Applicable only for nested cross-validation and Random Hold-Out Splits: Define Outer folds CV2
 input.inner_folds           = 10; % Applicable only for nested cross-validation and Random Hold-Out Splits: Define Inner folds CV1
-input.permutation_testing   = 5000; % Number of permutations for significance testing of each LV, default: 5000
-input.bootstrap_testing     = 500; % Number of bootstrap samples to measure Confidence intervals and bootstrap ratios for feature weights within LV: default 500 (100 also possible)
+input.permutation_testing   = 10; % Number of permutations for significance testing of each LV, default: 5000
+input.bootstrap_testing     = 10; % Number of bootstrap samples to measure Confidence intervals and bootstrap ratios for feature weights within LV: default 500 (100 also possible)
 input.correlation_method    = 'Spearman'; % Define which correlation method is used to compute correlation between latent scores of X and Y (used for significance testing of LV): default 'Spearman', also possible 'Pearson'
 input.cs_method.method      = 'mean-centering'; % Scaling of features, default: mean-centering, also possible 'min_max' (scaling from 0 to 1) => preferred scaling is mean-centering!
-input.cs_method.correction_subgroup = 'HC'; % Define whether you want to correct the covariates based on the betas of a subgroup, or simply across all individuals => for subgroup-based correction use the label, i.e., 'HC' or 'ROD, etc. Otherwise leave as empty string: ''.
+input.cs_method.correction_subgroup = 'group1'; % Define whether you want to correct the covariates based on the betas of a subgroup, or simply across all individuals => for subgroup-based correction use the label, i.e., 'HC' or 'ROD, etc. Otherwise leave as empty string: ''.
 input.coun_ts_limit         = 1; % Define after how many non-significant LVs the algorithm should stop, default: 1 (means that as soon as one LV is not significant, the operation ends)
 input.outer_permutations    = 1; % Define number of permutations in the CV2 folds, default: 1 (Toolbox is so far not optimized for permutations on folds, also, permutating the folds would severely increase computation time and is therefore not recommended
 input.inner_permutations    = 1; % Define number of permutations in the CV1 folds, default: 1 (Toolbox is so far not optimized for permutations on folds, also, permutating the folds would severely increase computation time and is therefore not recommended
@@ -86,10 +99,10 @@ input.grid_dynamic.onset    = 1; % Choose the marks for grid applications, defau
 
 % TO DO: grid needs to be defined based on number of matrices; better to
 % add this as cell also 
-input.density               = num2cell([50, 50, 50]); % should this be the same for all matrices or per matrix? 
-input.grid_dynamic.LVs   = cellfun(@create_grid, input.density); 
-%input.grid_dynamic.LV_1.x   = struct('start', 1, 'end', 0, 'density', input.density); 
-%input.grid_dynamic.LV_1.y   = struct('start', 1, 'end', 0, 'density', input.density);
+input.density               = num2cell(2); % should this be the same for all matrices or per matrix? 
+%input.grid_dynamic.LVs   = cellfun(@create_grid, input.density); 
+input.grid_dynamic.LV_1.x   = struct('start', 1, 'end', 0, 'density', input.density); 
+input.grid_dynamic.LV_1.y   = struct('start', 1, 'end', 0, 'density', input.density);
 % Define grid for hyperparameter search for the X matrix (cu parameter) =>
 % 'start': 1 means start is at value 1, 10 means it starts at the lower 10
 % percentile of the grid, etc. 
@@ -101,7 +114,7 @@ input.grid_dynamic.LVs   = cellfun(@create_grid, input.density);
 
 %% Create analysis datafile
 
-input.name = ['CV_gspls_test_', num2str(input.outer_folds), 'x', num2str(input.inner_folds), '_', num2str(input.permutation_testing), 'perm_', num2str(input.bootstrap_testing), 'boot_', num2str(50), 'density']; 
+input.name = ['CV_gspls_simulated_mini_test_', num2str(input.outer_folds), 'x', num2str(input.inner_folds), '_', num2str(input.permutation_testing), 'perm_', num2str(input.bootstrap_testing), 'boot_', cellfun(@num2str,input.density), 'density']; 
 
 input.datafile = [setup.analysis_folder, '/' setup.date, '_', input.name, '_datafile.mat']; % Path for storing datafile containing input and setup
 
@@ -114,8 +127,11 @@ save([input.datafile], 'setup', 'input'); % Saves datafile in analysis folder
 %end
 
 %dp_bash_main_job_slim_addedruntime_mult(input.datafile); % Start the analysis
-
-
+%% start analysis
+datafile = input.datafile;
+addpath(genpath('/Users/claravetter/local/Code/multiblock_spls/scripts/'))
+%%
+cv_run_gspls_Dev_2024(input.datafile)
 %%
 function grid = create_grid(density)
 grid = struct('start', 1, 'end', 0, 'density', density); 

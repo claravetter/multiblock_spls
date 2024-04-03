@@ -1,4 +1,4 @@
-function [weights, covariances, success, k, diff, dims] = cv_gspls(matrices, cs, gs, e, itr_lim, printopt, V_original)
+function [weights, covariances, success, k, diff, dims] = cv_gspls(matrices, cs, gs, e, itr_lim, printflag, V_original)
 %
 %   Generalized Sparse PLS algorithm
 %
@@ -18,6 +18,7 @@ function [weights, covariances, success, k, diff, dims] = cv_gspls(matrices, cs,
 
 %--- Initial checks
 %--------------------------------------------------------------------------
+printflag = -1;
 num_matrices = numel(matrices);
 
 % Initialize cell arrays
@@ -33,7 +34,9 @@ for i = 1:num_matrices
     if cs(i) < 1 || cs(i) > sqrt(num_weights(i))
         no_sparse_matrix(i) = true;
         failed_sparsity_weights(i) = false;
+        if printflag > -1
         warning(['c for matrix ' num2str(i) ' is out of interval: 1 <= c <= sqrt(number_features). Not using sparsity on this matrix.']);
+        end
     else
         no_sparse_matrix(i) = false;
     end
@@ -55,6 +58,7 @@ end
 
 weights_pairs = cell(num_matrices,1);
 % Initialize weight vectors using SVD of cross-covariance matrix
+
 for i = 1:num_matrices
 
     weights{i} = nan(num_weights(i), 2);
@@ -62,15 +66,26 @@ for i = 1:num_matrices
 
         % if size(matrices{i},2) >= size(matrices{j},2)
         covariances{i, j} = matrices{i}' * matrices{j}; % why not: cov(matrices{i}, matrices{j}); ?
-        [Us{i, j}, ~, Vs{i, j}] = svd(covariances{i, j}, 0);
+        if exist('Vs_original', 'var')
+            %--- compute SVD
+            [Us_resampled{i, j}, ~, Vs_resampled{i, j}] = svd(covariances{i, j}, 0);
 
 
-        % Procrustes rotation still missing
-        
+            %--- Perform Procrustes Rotation if permutation flag is set
+            C_temp = Vs_original{i,j}'*Vs_resampled{i,j};
+            [N,~,P] = svd(C_temp,0);
+            Q = N*P';
+            Vs = Vs_resampled * S * Q;
+            Us = Us_resampled * S * Q;
+
+        else
+            %--- compute SVD
+            [Us{i, j}, ~, Vs{i, j}] = svd(covariances{i, j}, 0);
+
+        end  
 
         weights_pairs{i,j}(:,1) = Vs{i,j}(:,1);
         weights_pairs{i,j}(:,1) = weights_pairs{i,j}(:,1)./norm(weights_pairs{i,j}(:,1)); % normalise
-
 
 
     end
@@ -94,7 +109,7 @@ for i = 1:num_matrices
     weights{i}(:, 1) = weights{i}(:, 1) ./ norm(weights{i}(:, 1));  % normalise
 end
 
-if printopt == 2 % detailed weight computation output
+if printflag == 2 % detailed weight computation output
 
     for i = 1:num_matrices
         fprintf('Initial weights %d: %s\n\n', i, strtrim(sprintf('%d ', weights{i}(:,1))));
@@ -106,7 +121,7 @@ end
 diff = 10 * e;  % start the diff with a high value
 k = 0;
 success = true;
-if printopt == 1
+if printflag == 1
     figure
 end
 while diff > e && success
@@ -129,7 +144,7 @@ while diff > e && success
 
         if ~no_sparse_matrix(i) % if sparse
             weights2 = weights;
-            [weights2{i}(:,2), tmp_success] = update(sum(weights_temp .* gs(i, :),2), cs(i));
+            [weights2{i}(:,2), tmp_success] = update(sum(weights_temp .* gs(i, :),2), cs(i),-1);
             failed_sparsity_weights(i) = ~tmp_success;
         end
 
@@ -162,7 +177,9 @@ while diff > e && success
 
 
     if k >= itr_lim
+        if printflag > -1
         warning('Maximum number of iterations reached.');
+        end
         success = false;
     end
 
@@ -180,7 +197,7 @@ while diff > e && success
     %     end
     % end
 
-    if printopt == 1
+    if printflag == 1
         scatter(k, corr(matrices{1}*weights{1}(:,2),matrices{2}*weights{2}(:,2)), 'yellow')
         hold on
         scatter(k, corr(matrices{1}*weights{1}(:,2),matrices{3}*weights{3}(:,2)), 'red')
@@ -190,7 +207,7 @@ while diff > e && success
     end
 
 
-    if printopt == 2 % detailed weight computation output
+    if printflag == 2 % detailed weight computation output
         fprintf('Iteration %d:\n', k)
         for i = 1:num_matrices
 
@@ -212,7 +229,9 @@ for i = 1:num_matrices
 
 end
 
-fprintf('SPLS: itr: %d    diff: %.2e    %s\n', k, diff, dims_str);
+if printflag > 0
+    fprintf('SPLS: itr: %d    diff: %.2e    %s\n', k, diff, dims_str);
+end
 
 
 
@@ -224,7 +243,7 @@ end
 
 %--- Private functions
 %--------------------------------------------------------------------------
-function [up, success] = update(w, c)
+function [up, success] = update(w, c, printflag)
 
 success = true;
 
@@ -259,13 +278,17 @@ if norm(up, 1) > c
         if delta2>max_delta, max_delta = delta2;end
 
         if delta2 == 0
+            if printflag > -1
             warning('Delta has to be zero.');
+            end
             success = false;
             break
         end
         i = i+1;
         if i>1E4
+            if printflag > -1
             warning('First delta estimation update did not converge.');
+            end
             delta1 = 0;
             delta2 = max_delta;
             break
@@ -275,7 +298,9 @@ if norm(up, 1) > c
 
     up = bisec(w, c, delta1, delta2);
     if isempty(up) || sum(isnan(up))>0
+        if printflag > -1
         warning('Delta estimation unsuccessful.')
+        end
         success = false;
     end
 

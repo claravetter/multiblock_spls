@@ -5,7 +5,7 @@ for i=1:length(data)
     lVs(:,i) = data{i}*weights{i};
 end
 
-corr_lVs = corrcoef(lVs); 
+corr_lVs{i} = corrcoef(lVs); 
 % CV: this function only allows the computation of the Pearson correlation
 % coefficient -->TO DO manual corr mat computation wit corr() and 'Type',
 % correlation_method

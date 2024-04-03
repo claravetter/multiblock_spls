@@ -1,6 +1,6 @@
 %% function for permutation testing
 
-function dp_ICV_permutation_csv(i, analysis_folder)
+function cv_ICV_permutation_csv(i, analysis_folder)
 
 m_setup = matfile([analysis_folder '/permutation_setup.mat']);
 
@@ -19,12 +19,11 @@ end
 % retrain on entirety of inner folds, 4) use already
 % existing u and v from inner folds without retraining
 
-IN_x.train = m_data.train_data_x;
-IN_x.test = m_data.test_data_x;
+IN_matrices.train = m_data.train_data_matrices;
+IN_matrices.test = m_data.test_data_matrices;
 COV.train = m_data.train_covariates;
 COV.test = m_data.test_covariates;
-IN_y.train = m_data.train_data_y;
-IN_y.test = m_data.test_data_y;
+
 
 cs_method_permutation = m_data.cs_method;
 
@@ -37,17 +36,17 @@ RHO_collection_ICV = nan(m_setup.size_sets_permutation,1);
 for ii=1:m_setup.size_sets_permutation
     % perform procrustean transformation to minimize rotation effects of
     % permutated y matrix, if V_opt available
-    IN_y.train = IN_y.train(permmat(ii,:),:);
+    IN_matrices.train{size(IN_matrices.train, 1)} = IN_matrices.train{size(IN_matrices.train, 1)}(permmat(ii,:),:);%CV: does it matter which matrix is being permuted? Only one? 
     
-    [OUT_x, OUT_y] = dp_master_correctscale(IN_x, IN_y, COV, cs_method_permutation, m_setup.correction_target);
+    [OUT_matrices] = cv_master_correctscale(IN_matrices, COV, cs_method_permutation, m_setup.correction_target);
     
-    if ~islogical(m_opt.V_opt)
-        RHO_collection_ICV(ii,1) = dp_spls_slim(OUT_x.train,OUT_y.train,OUT_x.test, OUT_y.test, m_opt.cu_opt, m_opt.cv_opt, m_setup.correlation_method, m_opt.V_opt);
+    if ~islogical(m_opt.Vs_opt)
+        RHO_collection_ICV(ii,1) = cv_gspls_slim(OUT_matrices.train, OUT_matrices.test, m_opt.c_weights_opt, m_setup.correlation_method, m_opt.Vs_opt);
     else
-        RHO_collection_ICV(ii,1) = dp_spls_slim(OUT_x.train,OUT_y.train,OUT_x.test, OUT_y.test, m_opt.cu_opt, m_opt.cv_opt, m_setup.correlation_method);
+        RHO_collection_ICV(ii,1) = cv_gspls_slim(OUT_matrices.train, OUT_matrices.test, m_opt.c_weights_opt, m_setup.correlation_method);
     end
 end
 
-writematrix(RHO_collection_ICV,[analysis_folder, '/RHO_results_', i, '.csv'],'Delimiter','tab')
+writematrix(RHO_collection_ICV,[analysis_folder, '/RHO_results_', num2str(i), '.csv'],'Delimiter','tab')
 
 end

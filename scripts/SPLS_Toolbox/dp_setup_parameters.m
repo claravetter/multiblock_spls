@@ -2,23 +2,16 @@
 
 function [input, setup, matrices, X, Y, B, K, W, OB, IB, size_sets_permutation, size_sets_bootstrap, correlation_method, cs_method, selection_train, selection_retrain, correction_target] = dp_setup_parameters(input, setup)
 
-% TO DO: check if paths are specified instead of matrices, cell fun 
-if isfield(input, 'matrices')
-    matrices = cellfun(@load_matrices,input.matrices, UniformOutput=false);
-    X = []; 
-    Y = [];
-else 
-    if isfield(input, 'X')
-        try temp = load(input.X);
-            % CV: what does this do?
-            field = fieldnames(temp);
-            X = temp.(field{1});
-            clear('temp');
-        catch
-            X = input.X;
-        end
+% TO DO: check if paths are specified instead of matrices, cell fun
+if isfield(input, 'X')
+    try temp = load(input.X);
+        % CV: what does this do?
+        field = fieldnames(temp);
+        X = temp.(field{1});
+        clear('temp');
+    catch
+        X = input.X;
     end
-
     if isfield(input, 'Y')
         try temp = load(input.Y);
             field = fieldnames(temp);
@@ -29,6 +22,14 @@ else
         end
     end
     matrices = [];
+else
+    if isfield(input, 'matrices')
+        matrices = cellfun(@load_matrices,input.matrices, UniformOutput=false);
+        X = [];
+        Y = [];
+    end
+
+
 end
 
 
@@ -147,8 +148,14 @@ end
 
 if isfield(input, 'grid_static')
     input.grid_dynamic.onset    = 1;
-    input.grid_dynamic.LV_1.x   = struct('start', 1, 'end', 0, 'density', input.grid_static);
-    input.grid_dynamic.LV_1.y   = struct('start', 1, 'end', 0, 'density', input.grid_static);
+    if isfield(input, 'X')
+        input.grid_dynamic.LV_1.x   = struct('start', 1, 'end', 0, 'density', input.grid_static);
+        input.grid_dynamic.LV_1.y   = struct('start', 1, 'end', 0, 'density', input.grid_static);
+    else
+        if isfield(input, 'matrices') % CV: TO DO - what is static grid? 
+            %input.grid_dynamic.LVs.x   = struct('start', 1, 'end', 0, 'density', input.grid_static);
+        end
+    end
 end
 
 if ~isfield(input, 'additional_NCV')
