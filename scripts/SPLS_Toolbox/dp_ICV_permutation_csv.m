@@ -36,7 +36,7 @@ RHO_collection_ICV = nan(m_setup.size_sets_permutation,1);
 
 for ii=1:m_setup.size_sets_permutation
     % perform procrustean transformation to minimize rotation effects of
-    % permutated y matrix, if V_opt available
+    % permutated y matrix, if V_opt available (in dp_spls())
     IN_y.train = IN_y.train(permmat(ii,:),:);
     
     [OUT_x, OUT_y] = dp_master_correctscale(IN_x, IN_y, COV, cs_method_permutation, m_setup.correction_target);

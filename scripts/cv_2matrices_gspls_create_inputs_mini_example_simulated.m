@@ -8,7 +8,7 @@ rng(42);
 
 % Number of samples and features
 numSamples = 100;
-numFeaturesX = 30;
+numFeaturesX = 25;
 numFeaturesY = 20;
 numFeaturesZ = 10;
 
@@ -17,7 +17,7 @@ X = randn(numSamples, numFeaturesX);
 Y = randn(numSamples, numFeaturesY);
 Z = randn(numSamples, numFeaturesZ);
 
-matrices = {X,Y,Z};
+matrices = {X,Y};
 %% Assign data for analysis in SPLS toolbox and create data and setup structure
 % Parameters for IT infrastructure
 setup.spls_standalone_path  = '/Users/claravetter/local/Code/multiblock_spls/'; % Path of the SPLS Toolboxsetup.date                  = date; % automatic date
@@ -40,7 +40,7 @@ input.type_correction       = 'uncorrected'; % Define whether you want to correc
 
 % TO DO: input should be an array with logical indices which matrices
 % should be corrected 
-input.correction_target     = [1,1,1]; % Define whether you want to remove covariate effects from 1) X, 2) Y or 3) both matrices
+input.correction_target     = [1,1]; % Define whether you want to remove covariate effects from 1) X, 2) Y or 3) both matrices
 
 input.sites                 = ones(size(matrices{1},1),1); % Dummy coded vector for sites, if only one site, then enter a column vector of ones
 %input.sites_names           = input.data_complete.foranalysis.sites.Properties.VariableNames; % Names of the sites
@@ -88,7 +88,7 @@ input.final_merge.mult_test = 'Benjamini_Hochberg'; % Define how correction for 
 input.final_merge.significant_only  = 'on'; % Only applicable if input.final_merge.type is not set to best! Defines type of CV2 fold merging: options: 'on' use only significant folds for merging, 'off' use all folds for merging
 input.final_merge.majority_vote     = 'on'; % Only applicable if input.final_merge.type is not set to best! options: 'on' use majority voting across folds to determine whether a value in u or v should be zero or non-zero, 'off' no majority vote, merging is done for all features, irrespective of whether in the majority of folds the feature was zero
 input.correct_limit         = 1; % Define in which iteration of the process covariate correction should be done, default: 1 (means that covariate correction is done before computing the first LV, then no more correction)
-input.statistical_testing   = 1; % Define how the P value is computed during permutation testing: 1) Counting method (number of instance where permuted models outperformed opimized model/number of permutations), 2) AUC method (permuted RHO values are used to compute AUC for optimal RHO value => option 2 usually gives slightly lower P values
+input.statistical_testing   = 2; % Define how the P value is computed during permutation testing: 1) Counting method (number of instance where permuted models outperformed opimized model/number of permutations), 2) AUC method (permuted RHO values are used to compute AUC for optimal RHO value => option 2 usually gives slightly lower P values
 
 % Hyperopt grid search specifics: Define in which LV iteration you want to
 % use which grid, default: stable grid across all iterations
@@ -97,7 +97,7 @@ input.grid_dynamic.onset    = 1; % Choose the marks for grid applications, defau
 
 % TO DO: grid needs to be defined based on number of matrices; better to
 % add this as cell also 
-input.density               = num2cell([2, 2, 2]); % should this be the same for all matrices or per matrix? 
+input.density               = num2cell([2, 2]); % should this be the same for all matrices or per matrix? 
 input.grid_dynamic.LVs   = cellfun(@create_grid, input.density); 
 %input.grid_dynamic.LV_1.x   = struct('start', 1, 'end', 0, 'density', input.density); 
 %input.grid_dynamic.LV_1.y   = struct('start', 1, 'end', 0, 'density', input.density);

@@ -35,8 +35,21 @@ input.sites                 = ones(267,1); % Dummy coded vector for sites, if on
 %input.sites_names           = input.data_complete.foranalysis.sites.Properties.VariableNames; % Names of the sites
 %input.covariates            = [covariate]; % [input.sites]; % Matrix with covariates (double)
 %input.covariates_names      = [covariate_name]; % Names of covariates (cell array)
+
+% Define the number of elements for each category
+num_hc = 150;
+num_pat = 117;
+
+% Create cell arrays with 'HC' and 'PAT' values
+hc_cell = repmat({'HC'}, num_hc, 1);
+pat_cell = repmat({'PAT'}, num_pat, 1);
+
+% Concatenate the cell arrays
+combined_cell = [hc_cell; pat_cell];
+
+
 input.Diag                  = [ones(150,1); ones(117,1)+1]; % input.data_complete.foranalysis.basic{PSN_MRI_final, 'DiagNum'}; % Column vector with diagnoses coded via numbers, i.e., [1 3 2 3 4 ]
-input.DiagNames             = num2cell(input.Diag); % input.data_complete.foranalysis.basic{input.Y_final.Properties.RowNames, 'Labels'}; % Column cell array with diagnoses/labels, i.e., {'HC', 'ROD', 'CHR', 'HC', 'ROP'}
+input.DiagNames             = combined_cell; % input.data_complete.foranalysis.basic{input.Y_final.Properties.RowNames, 'Labels'}; % Column cell array with diagnoses/labels, i.e., {'HC', 'ROD', 'CHR', 'HC', 'ROP'}
 
 % define X and Y
 % TO DO: change to matrices (cell array)
@@ -114,8 +127,8 @@ save([input.datafile], 'setup', 'input'); % Saves datafile in analysis folder
 %end
 
 %dp_bash_main_job_slim_addedruntime_mult(input.datafile); % Start the analysis
-
-
+%%
+cv_run_gspls_Dev_2024(input.datafile)
 %%
 function grid = create_grid(density)
 grid = struct('start', 1, 'end', 0, 'density', density); 

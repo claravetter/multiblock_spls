@@ -5,34 +5,32 @@ for i=1:length(data)
     lVs(:,i) = data{i}*weights{i};
 end
 
-corr_lVs = corrcoef(lVs); 
-% CV: this function only allows the computation of the Pearson correlation
-% coefficient -->TO DO manual corr mat computation wit corr() and 'Type',
-% correlation_method
-          
-mnfrob = norm(corr_lVs, 'fro');
-mn1 = norm(corr_lVs, 1);
-mn2 = norm(corr_lVs, 2);
-mnInf = norm(corr_lVs, Inf);
-
 % TO DO: user defined input what to use (also max pairwise correlation etc.
-RHO = mn2;
 
-% f_invert = @(x)(-1*x);
-% 
-% % CV: what does this do? 
-% if RHO<0
-%     v = f_invert(v);
-%     omega = data_y*v;
-%     RHO = corr(epsilon, omega, 'Type', correlation_method);
-% end
-% 
-% if sum(v)<0
-%     u = f_invert(u);
-%     v = f_invert(v);
-%     epsilon = data_x*u;
-%     omega = data_y*v;
-%     RHO = corr(epsilon, omega, 'Type', correlation_method);
-% end
-% 
+if size(lVs,2) == 2
+    RHO= corr(lVs(:, 1), lVs(:, 2), 'Type', correlation_method);
+    f_invert = @(x)(-1*x);
+    if RHO<0 % if correlation negative, invert one weight vector --> correlation positive
+        weights{2} = f_invert(weights{2});
+        lVs(:, 2) = data{2}*weights{2};
+        RHO = corr(lVs(:, 1), lVs(:, 2), 'Type', correlation_method);
+    end
+
+    if sum(weights{2})<0 % easier interpretation; v = phenotypic vector
+        weights{1} = f_invert(weights{1});
+        weights{2} = f_invert(weights{2});
+        lVs(:, 1) = data{1}*weights{1};
+        lVs(:, 2) = data{2}*weights{2};
+        RHO = corr(lVs(:, 1), lVs(:, 2), 'Type', correlation_method);
+    end
+else
+    corr_lVs = corr(lVs,'Type', correlation_method );
+    mnfrob = norm(corr_lVs, 'fro');
+    mn1 = norm(corr_lVs, 1);
+    mn2 = norm(corr_lVs, 2);
+    mnInf = norm(corr_lVs, Inf);
+    RHO = mn2;
+end
+
+
 end

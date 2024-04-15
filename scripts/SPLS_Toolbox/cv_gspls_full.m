@@ -1,6 +1,6 @@
 %% DP function for one k split
 
-function [RHO, weights, covariances, lVs] = cv_gspls_full(training_data, test_data, cs, correlation_method, printflag, V_original)
+function [RHO, weights, Vs, lVs] = cv_gspls_full(training_data, test_data, cs, correlation_method, Vs_original)
 
 % CV: implement as user input
 num_matrices = length(training_data);
@@ -9,13 +9,11 @@ e = 1e-5;
 itr_lim = 1000;
 printflag = 0; 
 %perform SPLS on the training data using the current cu/cv combination
-if exist('V_original', 'var')
-    train_data = cellfun(@(x) x.train, train_test_data);
-    test_data = cellfun(@(x) (x.test), train_test_data);
-    [weights, covariances, success, spls_itr, diff, dim_Ms] = cv_gspls(train_data, cs, gs, e, itr_lim, printflag, V_original);
+if exist('Vs_original', 'var')
+    [weights, ~, Vs, ~, ~, ~, ~] = cv_gspls(training_data, cs, gs, e, itr_lim, printflag, Vs_original);
             
 else
-    [weights, covariances, success, spls_itr, diff, dim_Ms] = cv_gspls(training_data, cs, gs, e, itr_lim, printflag);
+    [weights, ~, Vs, ~, ~, ~, ~] = cv_gspls(training_data, cs, gs, e, itr_lim, printflag);
 end
 
 %compute the correlation between the projections of the training and

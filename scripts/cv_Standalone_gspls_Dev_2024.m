@@ -1,6 +1,5 @@
 %% DP SPLS standalone function
-
-function cv_run_gspls_Dev_2024(datafile)
+function cv_Standalone_gspls_Dev_2024(datafile)
 
 %% initialize analysis folders
 % load the datafile that contains the data and the analysis information
@@ -374,7 +373,7 @@ while count_ns<input.coun_ts_limit
             % collect RHO
 
 
-            RHO_ICV_collection_temp = cv_ICV_main_csv_mult_sequential(hyperopt_folder, 'hyperopt', 1, setup.cache_path, num_matrices, xy_spls_flag);
+            RHO_ICV_collection_temp = cv_ICV_main_csv_mult_sequential(hyperopt_folder, 'hyperopt', hyperopt_sets, setup.parallel_jobs, setup.mem_request, setup.matlab_version, setup.compilation_subpath, setup.cache_path, num_matrices, xy_spls_flag);
 
             %RHO_ICV_collection_temp = dp_ICV_main_csv_mult(setup.spls_standalone_path, setup.queue_name, hyperopt_folder, 'hyperopt', hyperopt_sets, setup.parallel_jobs, setup.mem_request, setup.matlab_version, setup.compilation_subpath, setup.cache_path, num_matrices);
             RHO_ICV_collection = cat(2, RHO_ICV_collection, RHO_ICV_collection_temp);

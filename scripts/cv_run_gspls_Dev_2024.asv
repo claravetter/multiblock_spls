@@ -43,9 +43,9 @@ cd(final_results);
 % depending on how many matrices are being used, the number of columns
 % differs
 if ~isempty(X)
-    xy_spls_flag = 1; 
+    xy_spls_flag = 1;
 else
-    xy_spls_flag = 10;
+    xy_spls_flag = 0;
 end
 num_matrices = length(matrices);
 if ~isempty(X) % 'old' setup for two matrices
@@ -262,20 +262,20 @@ while count_ns<input.coun_ts_limit
     RHO_opt_collection=[];
 
     if xy_spls_flag
-    epsilon_opt_collection=[];
-    omega_opt_collection=[];
-    V_opt_collection=[]; % CV: what exactly is V in the multiblock setting?
-    weights_u = []; weights_v = []; weights_V=[]; 
+        epsilon_opt_collection=[];
+        omega_opt_collection=[];
+        V_opt_collection=[]; % CV: what exactly is V in the multiblock setting?
+        weights_u = []; weights_v = []; weights_V=[];
     else
 
-    lVs_opt_collection{num_matrices}=[];
-    Vs_opt_collection=[];
-    weights{num_matrices} = []; weights_Vs=[];
+        lVs_opt_collection{num_matrices}=[];
+        Vs_opt_collection=[];
+        weights{num_matrices} = []; weights_Vs=[];
     end
-    
 
-   weights_RHO=[];
-   
+
+    weights_RHO=[];
+
 
     if ff>input.correct_limit
         input.corrected_log(ff) = false;
@@ -303,9 +303,12 @@ while count_ns<input.coun_ts_limit
         % dataset, the rest is called the keep_in data for training/testing
         % the algorithm
         RHO_ICV_collection_temp=[];
-        u_ICV_collection_temp={}; v_ICV_collection_temp={}; % CV: unused?
-        ICV_collection_temp{num_matrices}={};
 
+        if xy_spls_flag
+            u_ICV_collection_temp={}; v_ICV_collection_temp={}; % CV: unused?
+        else
+            ICV_collection_temp{num_matrices}={};
+        end
         for ob=1:OB
             if ~isempty(X)
                 test_data_x = X_ana(output.CV.cv_outer_indices.TestInd{ob,w},:);
@@ -534,8 +537,12 @@ while count_ns<input.coun_ts_limit
                             v_opt = v_opt_collection(:, I_opt);
                             V_opt = V_opt_collection(:, :, I_opt);
                         else
-                            weights_opt = weights_opt_collection(:, I_opt);
-                            Vs_opt = Vs_opt_collection(:, I_opt);
+                            for num_m=1:num_matrices
+                                weights_opt{num_m} = weights_opt_collection{num_m,1}(:, I_opt);
+                                for num_m2=1:num_matrices
+                                    Vs_opt{num_m, num_m2} = Vs_opt_collection{num_m, num_m2}(:, :, I_opt);
+                                end
+                            end
                         end
 
                     otherwise
@@ -551,6 +558,8 @@ while count_ns<input.coun_ts_limit
                             Vs_opt = dp_trainmerge_single(Vs_opt_collection, input.merge_retrain, 3, weights_Vs);
                             for num_m= 1:num_matrices
                                 weights_opt{num_m} = dp_trainmerge_single(weights_opt_collection{num_m}, input.merge_retrain, 2, weights{num_m});
+                                for num_m=1:num_matrices
+                                    for num_m2=1:num_matrices
                                 Vs_opt = dp_trainmerge_single(Vs_opt_collection{num_m}, input.merge_retrain, 3, weights_Vs);
                             end
                             save([hyperopt_folder '/opt_vars_check.mat'],...
@@ -660,10 +669,13 @@ while count_ns<input.coun_ts_limit
 
 
                 RHO_opt_collection=[];
-                epsilon_opt_collection=[];
-                omega_opt_collection=[];
-                lVs_opt_collection{num_matrices}=[];
 
+                if xy_spls_flag
+                    epsilon_opt_collection=[];
+                    omega_opt_collection=[];
+                else
+                    lVs_opt_collection{num_matrices}=[];
+                end
 
                 RHO_selection = [];
 
@@ -995,7 +1007,7 @@ while count_ns<input.coun_ts_limit
                 log_fm_u = temp{1,opt_u} > 100;
                 log_fm_v = temp{1,opt_v} > 100;
             else
-               
+
                 log_fm_weights{num_m}= temp{1,opt_weights}{num_m}>100;
 
             end
@@ -1106,12 +1118,12 @@ while count_ns<input.coun_ts_limit
 
         train_data_matrices = cellfun(wrapper_train, matrices_ana, UniformOutput=false);
 
-        
+
         % save the optimized parameters and the permutation matrix
         save([bootstrap_folder '/bootstrap_partition_fold.mat'],...
             'train_data_matrices', 'train_covariates', 'train_DiagNames', 'cs_method', '-v7.3');
 
-       
+
     end
 
     [RHO_boot, weights_boot] = cv_ICV_main_csv_mult_sequential(bootstrap_folder, 'bootstrap', 1, setup.cache_path, num_matrices, xy_spls_flag);

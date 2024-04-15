@@ -81,7 +81,7 @@ if exist('V_original', 'var')
     C_temp = V_original'*V_resampled;
     [N,~,P] = svd(C_temp,0);
     Q = N*P';
-    V = V_resampled * Q * S'; % CV: added transpose to S here and swapped order of S and Q
+    V = V_resampled * S * Q; % CV: added transpose to S here and swapped order of S and Q to  ... * Q * S'
     U = U_resampled * S * Q;
     
     %--- continue with the rotated U and V matrices in the SPLS algorithm

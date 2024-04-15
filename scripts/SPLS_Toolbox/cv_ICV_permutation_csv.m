@@ -27,17 +27,23 @@ COV.test = m_data.test_covariates;
 
 cs_method_permutation = m_data.cs_method;
 
-for pp=1:str2double(i)
-    permmat = nk_PermInd(m_setup.size_sets_permutation, m_data.train_Diag);
+for num_m=1:length(IN_matrices.train)-1
+    for pp=1:str2double(i)
+        permmat = nk_PermInd(m_setup.size_sets_permutation, m_data.train_Diag); % C: nk_PermInd if NeuroMiner_Current; nk_PermInd if NeuroMiner_1.2 / _1.1
+    end
+    permmats{num_m} = permmat; 
 end
-
+clear permmat
 RHO_collection_ICV = nan(m_setup.size_sets_permutation,1);
 
 for ii=1:m_setup.size_sets_permutation
     % perform procrustean transformation to minimize rotation effects of
     % permutated y matrix, if V_opt available
-    IN_matrices.train{size(IN_matrices.train, 1)} = IN_matrices.train{size(IN_matrices.train, 1)}(permmat(ii,:),:);%CV: does it matter which matrix is being permuted? Only one? 
-    
+    for num_m=1:length(IN_matrices.train)-1
+        IN_matrices.train{num_m+1} = IN_matrices.train{num_m+1}(permmats{num_m}(ii,:),:);%CV: does it matter which matrix is being permuted? Only one? 
+    % CV 10.4.2024: alle anderen Matrizen außer die erste müssen permutiert werden --> permmat{} pro Matrix  
+    end
+
     [OUT_matrices] = cv_master_correctscale(IN_matrices, COV, cs_method_permutation, m_setup.correction_target);
     
     if ~islogical(m_opt.Vs_opt)

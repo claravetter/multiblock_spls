@@ -8,7 +8,7 @@ rng(42);
 
 % Number of samples and features
 numSamples = 100;
-numFeaturesX = 15;
+numFeaturesX = 25;
 numFeaturesY = 20;
 numFeaturesZ = 10;
 
@@ -54,7 +54,7 @@ input.DiagNames             = cellstr("group" + input.Diag); % input.data_comple
 input.X = X; 
 input.Y = Y;
 input.matrices              = matrices; % 1st data matrix, usually for MRI/biological data, if applicable. If MRI data, then either put in the path to a Matlab file, containing only one variable with vectorized MRI data, or put in vectorized MRI data itself, otherwise just put in the matrix (double format)
-input.matrix_names               = []; % define names of features in X, if MRI data, or no names applicable, leave empty
+input.matrix_names          = []; % define names of features in X, if MRI data, or no names applicable, leave empty
 %input.Y                     = Y_final.Variables; % 2nd data matrix, usually for behavioral/phenotypical data (double format) 
 %input.Y_names               = Y_final.Properties.VariableNames; % define names of features in X, if no names applicable, leave empty
 %input.subscales             = input.Y_names; % Optional, only for post hoc visualization needed
@@ -63,8 +63,8 @@ input.matrix_names               = []; % define names of features in X, if MRI d
 input.framework             = 1; % Cross-validation setup: 1 = nested cross-validation, 2 = random hold-out splits, 3 = LOSOCV, 4 = random split-half
 input.outer_folds           = 2; % Applicable only for nested cross-validation and Random Hold-Out Splits: Define Outer folds CV2
 input.inner_folds           = 10; % Applicable only for nested cross-validation and Random Hold-Out Splits: Define Inner folds CV1
-input.permutation_testing   = 10; % Number of permutations for significance testing of each LV, default: 5000
-input.bootstrap_testing     = 10; % Number of bootstrap samples to measure Confidence intervals and bootstrap ratios for feature weights within LV: default 500 (100 also possible)
+input.permutation_testing   = 1000; % Number of permutations for significance testing of each LV, default: 5000
+input.bootstrap_testing     = 100; % Number of bootstrap samples to measure Confidence intervals and bootstrap ratios for feature weights within LV: default 500 (100 also possible)
 input.correlation_method    = 'Spearman'; % Define which correlation method is used to compute correlation between latent scores of X and Y (used for significance testing of LV): default 'Spearman', also possible 'Pearson'
 input.cs_method.method      = 'mean-centering'; % Scaling of features, default: mean-centering, also possible 'min_max' (scaling from 0 to 1) => preferred scaling is mean-centering!
 input.cs_method.correction_subgroup = 'group1'; % Define whether you want to correct the covariates based on the betas of a subgroup, or simply across all individuals => for subgroup-based correction use the label, i.e., 'HC' or 'ROD, etc. Otherwise leave as empty string: ''.
@@ -114,7 +114,7 @@ input.grid_dynamic.LV_1.y   = struct('start', 1, 'end', 0, 'density', input.dens
 
 %% Create analysis datafile
 
-input.name = ['CV_gspls_simulated_mini_test_', num2str(input.outer_folds), 'x', num2str(input.inner_folds), '_', num2str(input.permutation_testing), 'perm_', num2str(input.bootstrap_testing), 'boot_', cellfun(@num2str,input.density), 'density']; 
+input.name = ['CV_standard_spls_simulated_mini_test_', num2str(input.outer_folds), 'x', num2str(input.inner_folds), '_', num2str(input.permutation_testing), 'perm_', num2str(input.bootstrap_testing), 'boot_', cellfun(@num2str,input.density), 'density']; 
 
 input.datafile = [setup.analysis_folder, '/' setup.date, '_', input.name, '_datafile.mat']; % Path for storing datafile containing input and setup
 

@@ -1,4 +1,4 @@
-function [weights, covariances, success, k, diff, dims] = cv_gspls(matrices, cs, gs, e, itr_lim, printflag, V_original)
+function [weights, covariances, Vs, success, k, diff, dims] = cv_gspls(matrices, cs, gs, e, itr_lim, printflag, Vs_original)
 %
 %   Generalized Sparse PLS algorithm
 %
@@ -56,7 +56,7 @@ end
 %--- SPLS
 %--------------------------------------------------------------------------
 
-weights_pairs = cell(num_matrices,1);
+weights_pairs = cell(num_matrices,num_matrices);
 % Initialize weight vectors using SVD of cross-covariance matrix
 
 for i = 1:num_matrices
@@ -68,15 +68,14 @@ for i = 1:num_matrices
         covariances{i, j} = matrices{i}' * matrices{j}; % why not: cov(matrices{i}, matrices{j}); ?
         if exist('Vs_original', 'var')
             %--- compute SVD
-            [Us_resampled{i, j}, ~, Vs_resampled{i, j}] = svd(covariances{i, j}, 0);
-
+            [Us_resampled{i, j}, S, Vs_resampled{i, j}] = svd(covariances{i, j}, 0);
 
             %--- Perform Procrustes Rotation if permutation flag is set
             C_temp = Vs_original{i,j}'*Vs_resampled{i,j};
             [N,~,P] = svd(C_temp,0);
             Q = N*P';
-            Vs = Vs_resampled * S * Q;
-            Us = Us_resampled * S * Q;
+            Vs{i,j} = Vs_resampled{i,j} * Q * S';
+            Us{i,j} = Us_resampled{i,j} * S * Q;
 
         else
             %--- compute SVD
@@ -93,7 +92,6 @@ end
 
 for i = 1:num_matrices
     % Initialize vs_combined as a sum of weighted columns from Vs
-    us_combined = zeros(num_weights(i), 1);
     vs_combined = zeros(num_weights(i), 1);
     for j = 1:num_matrices
         if j ~= i

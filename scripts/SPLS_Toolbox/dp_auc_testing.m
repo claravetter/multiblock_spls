@@ -17,7 +17,7 @@ else
 end
 
 [N, edges] = histcounts(dist, 'BinWidth', bin_width);
-x = 0:bin_width:((size(edges,2)-2)*bin_width);
+x = edges(1:end-1) + bin_width/2; % CV: changed from x = 0:bin_width:((size(edges,2)-2)*bin_width) or scale mn before calling function 
 y = N;
 
 [~, index] = min(abs(x-val));

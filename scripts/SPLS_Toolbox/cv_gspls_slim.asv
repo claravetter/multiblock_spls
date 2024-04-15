@@ -1,5 +1,5 @@
 
-function [RHO] = cv_gspls_slim(training_data, test_data, cs, correlation_method, Vs_original)
+function [RHO] = cv_gspls_slim(training_data, test_data, cs, correlation_method, V_original)
 
 % CV: implement as user input
 num_matrices = length(training_data);
@@ -8,11 +8,12 @@ e = 1e-5;
 itr_lim = 1000;
 printflag = 0; 
 %perform SPLS on the training data using the current cu/cv combination
-if exist('Vs_original', 'var')
-    [weights, ~, ~, ~, ~, ~, ~] = cv_gspls(training_data, cs, gs, e, itr_lim, printflag, Vs_original);
+if exist('V_original', 'var')
+    V_original = V_original';
+    [weights, ~, ~, ~, ~, ~] = cv_gspls(training_data, cs, gs, e, itr_lim, printflag, V_original);
             
 else
-    [weights, ~, ~, ~, ~, ~, ~] = cv_gspls(training_data, cs, gs, e, itr_lim, printflag);
+    [weights, ~, ~, ~, ~, ~] = cv_gspls(training_data, cs, gs, e, itr_lim, printflag);
 end
 
 %compute the correlation between the projections of the training and
