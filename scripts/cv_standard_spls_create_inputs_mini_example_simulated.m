@@ -20,17 +20,17 @@ Z = randn(numSamples, numFeaturesZ);
 matrices = {X,Y,Z};
 %% Assign data for analysis in SPLS toolbox and create data and setup structure
 % Parameters for IT infrastructure
-setup.spls_standalone_path  = '/Users/claravetter/local/Code/multiblock_spls/'; % Path of the SPLS Toolboxsetup.date                  = date; % automatic date
+setup.spls_standalone_path  = '/volume/projects/CV_gs_PLS/ScrFun/multiblock_spls'; % Path of the SPLS Toolboxsetup.date                  = date; % automatic date
 setup.date                  = date; % automatic date
-setup.analysis_folder       = ['/Users/claravetter/local/Projects/mSPLS/', setup.date]; % analysis folder is created automatically using the current date
+setup.analysis_folder       = ['/volume/projects/CV_gs_PLS/Analysis', setup.date]; % analysis folder is created automatically using the current date
 setup.queue_name            = 'all.q'; % Choose queue for master and slave jobs, choose between psy0cf20 and mitnvp1-2 and all.q
 setup.email                 = 'clara.vetter@med.uni-muenchen.de'; % your email address
 setup.max_sim_jobs          = 1; % Define how many parallel jobs are created
 setup.parallel_jobs         = 20; % Define how many jobs run in parallel at the same time (soft threshold)
 setup.mem_request           = 5; % Memory request for master and slave jobs, in GB, maybe decrease to 2 or 3
 setup.matlab_version        = 'R2022b'; % Define the runtime engine, currently its R2020b
-setup.cache_path            = '/Users/claravetter/local/Projects/mSPLS/temp/'; % Path for output text files during hyperopt, permutation, bootstrapping => generally same as scratch space
-setup.scratch_space         = '/Users/claravetter/local/Projects/mSPLS/nmcache/clvetter'; % Path for temporary file storage (hyperopt, permutation, bootstrapping) during analysis, please insert your own folder in the scratch space
+setup.cache_path            = '/volume/mitnvp1_scratch/CV_SPLS'; % Path for output text files during hyperopt, permutation, bootstrapping => generally same as scratch space
+setup.scratch_space         = '/volume/mitnvp1_scratch/CV_SPLS/nmcache/clvetter'; % Path for temporary file storage (hyperopt, permutation, bootstrapping) during analysis, please insert your own folder in the scratch space
 setup.compilation_subpath   = 'for_testing'; % default
 
 % Accessory data input
@@ -131,7 +131,8 @@ save([input.datafile], 'setup', 'input'); % Saves datafile in analysis folder
 datafile = input.datafile;
 addpath(genpath('/Users/claravetter/local/Code/multiblock_spls/scripts/'))
 %%
-cv_run_gspls_Dev_2024(input.datafile)
+%cv_run_gspls_Dev_2024(input.datafile)
+cv_gspls_standalone_Dev_2024(input.datafile)
 %%
 function grid = create_grid(density)
 grid = struct('start', 1, 'end', 0, 'density', density); 

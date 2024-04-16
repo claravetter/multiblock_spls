@@ -1,6 +1,6 @@
 %% function for RHO parallel computing
 
-function [RHO_ICV, weights_ICV] = cv_ICV_main_csv_mult(analysis_folder, type_analysis, total_jobs, parallel_jobs, mem_request, matlab_version, compilation_subpath, cache_path, num_matrices, xy_spls_flag)
+function [RHO_ICV, weights_ICV] = cv_ICV_main_csv_mult(spls_standalone_path, queue_name, analysis_folder, type_analysis, total_jobs, parallel_jobs, mem_request, matlab_version, compilation_subpath, cache_path, num_matrices, xy_spls_flag)
 
 if xy_spls_flag
     RHO_bash = dp_ICV_bash_job_mult(spls_standalone_path, queue_name, analysis_folder, type_analysis, total_jobs, parallel_jobs, mem_request, matlab_version, compilation_subpath, cache_path);

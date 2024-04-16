@@ -1,5 +1,5 @@
 %% DP SPLS standalone function
-function cv_Standalone_gspls_Dev_2024(datafile)
+function cv_gspls_standalone_Dev_2024(datafile)
 
 %% initialize analysis folders
 % load the datafile that contains the data and the analysis information
@@ -373,7 +373,7 @@ while count_ns<input.coun_ts_limit
             % collect RHO
 
 
-            RHO_ICV_collection_temp = cv_ICV_main_csv_mult(hyperopt_folder, 'hyperopt', hyperopt_sets, setup.parallel_jobs, setup.mem_request, setup.matlab_version, setup.compilation_subpath, setup.cache_path, num_matrices, xy_spls_flag);
+            RHO_ICV_collection_temp = cv_ICV_main_csv_mult(setup.spls_standalone_path, setup.queue_name, hyperopt_folder, 'hyperopt', hyperopt_sets, setup.parallel_jobs, setup.mem_request, setup.matlab_version, setup.compilation_subpath, setup.cache_path, num_matrices, xy_spls_flag);
 
             %RHO_ICV_collection_temp = dp_ICV_main_csv_mult(setup.spls_standalone_path, setup.queue_name, hyperopt_folder, 'hyperopt', hyperopt_sets, setup.parallel_jobs, setup.mem_request, setup.matlab_version, setup.compilation_subpath, setup.cache_path, num_matrices);
             RHO_ICV_collection = cat(2, RHO_ICV_collection, RHO_ICV_collection_temp);
@@ -630,7 +630,7 @@ while count_ns<input.coun_ts_limit
                 % within the current fold or whether permutation testing shall
                 % be done across all outer folds
                 %RHO_b_collection = dp_ICV_main_csv_mult(setup.spls_standalone_path, setup.queue_name, permutation_folder, 'permutation', perm_sets, setup.parallel_jobs, setup.mem_request, setup.matlab_version, setup.compilation_subpath, setup.cache_path);
-                RHO_b_collection = cv_ICV_main_csv_mult(permutation_folder, 'permutation', perm_sets, setup.cache_path, num_matrices, xy_spls_flag);
+                RHO_b_collection = cv_ICV_main_csv_mult(setup.spls_standalone_path,  setup.queue_name, permutation_folder, 'permutation', perm_sets, setup.parallel_jobs, setup.mem_request, setup.matlab_version, setup.compilation_subpath, setup.cache_path, num_matrices, xy_spls_flag);
 
                 % calculate the p value, how the optimized model performs
                 % agains the permuted model: 2 options => counting or AUC
@@ -885,7 +885,7 @@ while count_ns<input.coun_ts_limit
             save([permutation_folder '/permutation_opt.mat'], 'c_weights_opt', 'Vs_opt','-v7.3');
 
 
-            RHO_b_collection = cv_ICV_main_csv_mult(permutation_folder, 'permutation', perm_sets, setup.cache_path, num_matrices, xy_spls_flag);
+            RHO_b_collection = cv_ICV_main_csv_mult(setup.spls_standalone_path,  setup.queue_name, permutation_folder, 'permutation', perm_sets, setup.parallel_jobs, setup.mem_request, setup.matlab_version, setup.compilation_subpath, setup.cache_path, num_matrices, xy_spls_flag);
 
         end
 
@@ -1127,7 +1127,7 @@ while count_ns<input.coun_ts_limit
 
     end
 
-    [RHO_boot, weights_boot] = cv_ICV_main_csv_mult(bootstrap_folder, 'bootstrap', boot_sets, setup.cache_path, num_matrices, xy_spls_flag);
+    [RHO_boot, weights_boot] = cv_ICV_main_csv_mult(setup.spls_standalone_path,  setup.queue_name, bootstrap_folder, 'bootstrap', boot_sets, setup.parallel_jobs, setup.mem_request, setup.matlab_version, setup.compilation_subpath, setup.cache_path, num_matrices, xy_spls_flag);
     if xy_spls_flag
         u_boot = weights_boot{1};
         v_boot = weights_boot{2};
@@ -1301,7 +1301,7 @@ while count_ns<input.coun_ts_limit
                         'train_data_matrices', 'test_data_matrices', 'train_covariates', 'test_covariates',...
                         'train_Diag', 'cs_method_val', '-v7.3');
 
-                    RHO_b_collection = cv_ICV_main_csv_mult(permutation_folder, 'permutation', perm_sets, setup.cache_path, num_matrices);
+                    RHO_b_collection = cv_ICV_main_csv_mult(setup.spls_standalone_path,  setup.queue_name, permutation_folder, 'permutation', perm_sets, setup.parallel_jobs, setup.mem_request, setup.matlab_version, setup.compilation_subpath, setup.cache_path, num_matrices);
 
                 end
 

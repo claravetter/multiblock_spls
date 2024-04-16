@@ -51,10 +51,19 @@ for ii=1:size(bootsam,2)
     end
 end
 
-writematrix(RHO_boot,[analysis_folder, '/RHO_results_', num2str(i), '.csv'],'Delimiter','tab')
+if isnumeric(i)
+    writematrix(RHO_boot,[analysis_folder, '/RHO_results_', num2str(i), '.csv'],'Delimiter','tab')
+else
+    writematrix(RHO_boot,[analysis_folder, '/RHO_results_', i, '.csv'],'Delimiter','tab')
+end
+
 
 for num_m=1:length(matrices)
-    writecell(weights_boot(num_m, :),[analysis_folder, '/weights_', num2str(num_m), '_results_', num2str(i), '.csv'],'Delimiter','tab')
+    if isnumeric(i)
+        writecell(weights_boot(num_m, :),[analysis_folder, '/weights_', num2str(num_m), '_results_', num2str(i), '.csv'],'Delimiter','tab')
+    else
+        writematrix(RHO_boot,[analysis_folder, '/RHO_results_', i, '.csv'],'Delimiter','tab')
+    end
 end
 
 

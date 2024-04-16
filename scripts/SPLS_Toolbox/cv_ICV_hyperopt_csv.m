@@ -4,10 +4,18 @@ function cv_ICV_hyperopt_csv(i,analysis_folder)
 
 m = matfile([analysis_folder '/hyperopt_partition.mat']);
 
-extract_target = (i-1)*m.size_sets_hyperopt+1;
+if isnumeric(i)
+    extract_target = (i-1)*m.size_sets_hyperopt+1;
+else
+    extract_target = (str2double(i)-1)*m.size_sets_hyperopt+1;
+end
+
+disp(['i = ', i, "; extract_target = ", extract_target]);
 try
+    %disp(extract_target:(extract_target+m.size_sets_hyperopt-1));
     weights_extract = m.weights_combination(extract_target:(extract_target+m.size_sets_hyperopt-1),:);
 catch
+    %disp(extract_target);
     weights_extract = m.weights_combination(extract_target:end,:);
 end
 
