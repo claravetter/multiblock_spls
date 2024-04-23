@@ -72,7 +72,11 @@ switch type_analysis
             else
 
                 for j=1:num_matrices
-                    path_file = [analysis_folder '/weights_' num2str(j) '_results_' num2str(i),'.csv'];
+                    if isnumeric(i)
+                        path_file = [analysis_folder '/weights_' num2str(j) '_results_' num2str(i),'.csv'];
+                    else
+                        path_file = [analysis_folder '/weights_' num2str(j) '_results_' i,'.csv'];
+                    end
                     weights_collection_temp = readmatrix(path_file);
                     weights_collection{j} = [weights_collection{j}, weights_collection_temp];
 
@@ -86,7 +90,11 @@ switch type_analysis
 
 
         for i=1:total_jobs
-            path_file = [analysis_folder '/RHO_results_' num2str(i),'.csv'];
+            if isnumeric(i)
+                path_file = [analysis_folder '/RHO_results_' num2str(i),'.csv'];
+            else
+                path_file = [analysis_folder '/RHO_results_' i,'.csv'];
+            end
             RHO_collection_temp = load(path_file);
             RHO_collection = [RHO_collection, RHO_collection_temp];
             delete(path_file);
@@ -98,7 +106,11 @@ switch type_analysis
 
 
         for i=1:total_jobs
-            path_file = [analysis_folder '/RHO_results_' num2str(i),'.csv'];
+            if isnumeric(i)
+                path_file = [analysis_folder '/RHO_results_' num2str(i),'.csv'];
+            else
+                path_file = [analysis_folder '/RHO_results_' i,'.csv'];
+            end
             RHO_collection_temp = readmatrix(path_file);
             RHO_collection = [RHO_collection; RHO_collection_temp];
             delete(path_file);

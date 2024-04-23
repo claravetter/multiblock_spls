@@ -62,7 +62,7 @@ for num_m=1:length(matrices)
     if isnumeric(i)
         writecell(weights_boot(num_m, :),[analysis_folder, '/weights_', num2str(num_m), '_results_', num2str(i), '.csv'],'Delimiter','tab')
     else
-        writematrix(RHO_boot,[analysis_folder, '/RHO_results_', i, '.csv'],'Delimiter','tab')
+        writecell(weights_boot(num_m, :),[analysis_folder, '/weights_', num2str(num_m), '_results_', i, '.csv'],'Delimiter','tab')
     end
 end
 

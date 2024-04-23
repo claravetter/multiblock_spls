@@ -67,15 +67,29 @@ for i = 1:num_matrices
         % if size(matrices{i},2) >= size(matrices{j},2)
         covariances{i, j} = matrices{i}' * matrices{j}; % why not: cov(matrices{i}, matrices{j}); ?
         if exist('Vs_original', 'var')
-            %--- compute SVD
-            [Us_resampled{i, j}, S, Vs_resampled{i, j}] = svd(covariances{i, j}, 0);
+                        %--- compute SVD
+            
+%             if size(matrices{i},2) < size(matrices{j},2)
+%                 addcols = size(matrices{j},2) - size(matrices{i},2);
+%                 matrices{i} = [matrices{i}, zeros(size(matrices{i},1), addcols)];
+%             end
+%             covariances{i, j} = matrices{i}' * matrices{j}; % why not: cov(matrices{i}, matrices{j}); ?
+        
+            [~, S, Vs_resampled{i, j}] = svd(covariances{i, j},0);
 
             %--- Perform Procrustes Rotation if permutation flag is set
-            C_temp = Vs_original{i,j}'*Vs_resampled{i,j};
-            [N,~,P] = svd(C_temp,0);
-            Q = N*P';
-            Vs{i,j} = Vs_resampled{i,j} * Q * S';
-            Us{i,j} = Us_resampled{i,j} * S * Q;
+            %Vs{i,j} = nk_Procrustes(Vs_original{i,j},Vs_resampled{i,j});
+            [~, Vs{i,j}] = procrustes(Vs_original{i,j},Vs_resampled{i,j});
+%             C_temp = Vs_original{i,j}'*Vs_resampled{i,j}; %procrustes(Vs_original{i,j},Vs_resampled{i,j}) % 
+%             [N,~,P] = svd(C_temp,0);
+%             Q = N*P';
+%             Vs{i,j} = Vs_resampled{i,j} * Q; % S * Q;
+%            % Us{i,j} = Us_resampled{i,j} * S * Q;
+
+%             if size(matrices{i},2) < size(matrices{j},2)
+%                 %addcols 
+%             end
+            
 
         else
             %--- compute SVD
