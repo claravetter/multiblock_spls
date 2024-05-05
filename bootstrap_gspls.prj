@@ -1,5 +1,5 @@
 <deployment-project plugin="plugin.ezdeploy" plugin-version="1.0">
-  <configuration build-checksum="833378529" file="/volume/projects/CV_gs_PLS/ScrFun/multiblock_spls/bootstrap_gspls.prj" location="/volume/projects/CV_gs_PLS/ScrFun/multiblock_spls" name="bootstrap_gspls" preferred-package-location="/volume/projects/CV_gs_PLS/ScrFun/multiblock_spls/bootstrap_gspls/for_redistribution" preferred-package-type="package.type.install" target="target.ezdeploy.standalone" target-name="Application Compiler">
+  <configuration build-checksum="234545828" file="/volume/projects/CV_gs_PLS/ScrFun/multiblock_spls/bootstrap_gspls.prj" location="/volume/projects/CV_gs_PLS/ScrFun/multiblock_spls" name="bootstrap_gspls" preferred-package-location="/volume/projects/CV_gs_PLS/ScrFun/multiblock_spls/bootstrap_gspls/for_redistribution" preferred-package-type="package.type.install" target="target.ezdeploy.standalone" target-name="Application Compiler">
     <param.appname>bootstrap_gspls</param.appname>
     <param.icon />
     <param.icons />
@@ -97,21 +97,16 @@ ${LD_LIBRARY_PATH}:MR/v912/runtime/glnxa64:MR/v912/bin/glnxa64:MR/v912/sys/os/gl
     <fileset.resources />
     <fileset.package />
     <fileset.depfun>
-      <file>/opt/NM/NeuroMiner_Current/preproc/combat/aprior.m</file>
-      <file>/opt/NM/NeuroMiner_Current/preproc/combat/bprior.m</file>
-      <file>/opt/NM/NeuroMiner_Current/preproc/combat/combat.m</file>
-      <file>/opt/NM/NeuroMiner_Current/preproc/combat/itSol.m</file>
-      <file>/opt/NM/NeuroMiner_Current/preproc/combat/postmean.m</file>
-      <file>/opt/NM/NeuroMiner_Current/preproc/combat/postvar.m</file>
-      <file>/opt/NM/NeuroMiner_Current/preproc/cv_icaHarmonize.m</file>
-      <file>/opt/NM/NeuroMiner_Current/preproc/nk_PartialCorrelationsObj.m</file>
-      <file>/opt/NM/NeuroMiner_Current/preproc/nmfv1_4/iszero.m</file>
-      <file>/opt/NM/test_versions/NeuroMiner_Current_CVFork/NeuroMiner_Current/preproc/FastICA_25/fastica.m</file>
-      <file>/opt/NM/test_versions/NeuroMiner_Current_CVFork/NeuroMiner_Current/preproc/FastICA_25/fpica.m</file>
-      <file>/opt/NM/test_versions/NeuroMiner_Current_CVFork/NeuroMiner_Current/preproc/FastICA_25/icaplot.m</file>
-      <file>/opt/NM/test_versions/NeuroMiner_Current_CVFork/NeuroMiner_Current/preproc/FastICA_25/pcamat.m</file>
-      <file>/opt/NM/test_versions/NeuroMiner_Current_CVFork/NeuroMiner_Current/preproc/FastICA_25/remmean.m</file>
-      <file>/opt/NM/test_versions/NeuroMiner_Current_CVFork/NeuroMiner_Current/preproc/FastICA_25/whitenv.m</file>
+      <file>/opt/NM/test_versions/NeuroMiner_Current/FeatGen/discretize.m</file>
+      <file>/opt/NM/test_versions/NeuroMiner_Current_CVFork/NeuroMiner_Current/preproc/RemoveDisparateImpact.m</file>
+      <file>/opt/NM/test_versions/NeuroMiner_Current_CVFork/NeuroMiner_Current/preproc/combat/aprior.m</file>
+      <file>/opt/NM/test_versions/NeuroMiner_Current_CVFork/NeuroMiner_Current/preproc/combat/bprior.m</file>
+      <file>/opt/NM/test_versions/NeuroMiner_Current_CVFork/NeuroMiner_Current/preproc/combat/combat.m</file>
+      <file>/opt/NM/test_versions/NeuroMiner_Current_CVFork/NeuroMiner_Current/preproc/combat/itSol.m</file>
+      <file>/opt/NM/test_versions/NeuroMiner_Current_CVFork/NeuroMiner_Current/preproc/combat/postmean.m</file>
+      <file>/opt/NM/test_versions/NeuroMiner_Current_CVFork/NeuroMiner_Current/preproc/combat/postvar.m</file>
+      <file>/opt/NM/test_versions/NeuroMiner_Current_CVFork/NeuroMiner_Current/preproc/nk_PartialCorrelationsObj.m</file>
+      <file>/opt/NM/test_versions/NeuroMiner_Current_CVFork/NeuroMiner_Current/preproc/nmfv1_4/iszero.m</file>
       <file>${PROJECT_ROOT}/scripts/SPLS_Toolbox/cv_gspls.m</file>
       <file>${PROJECT_ROOT}/scripts/SPLS_Toolbox/cv_gspls_full.m</file>
       <file>${PROJECT_ROOT}/scripts/SPLS_Toolbox/cv_master_correctscale.m</file>

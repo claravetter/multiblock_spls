@@ -44,7 +44,7 @@ for ii=1:size(weights_extract,1)
                 OUT = IN;
             end
             
-            [RHO_collection_ICV(ii,nn), weights_collection_ICV{ii,:}(:,nn), ~, ~] = cv_gspls_full(OUT.train, OUT.test, weights, m.correlation_method);
+            [RHO_collection_ICV(ii,nn), weights_collection_ICV{ii,:}(:,nn), ~, ~] = cv_gspls_full(OUT.train, OUT.test, weights, m.correlation_method, m.matrix_norm);
             nn=nn+1;
         end
     end

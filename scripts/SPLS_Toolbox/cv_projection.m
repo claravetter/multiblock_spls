@@ -1,5 +1,5 @@
 %% DP function for projection of u and v onto test data
-function [RHO, lVs, weights] = cv_projection(data, weights, correlation_method)
+function [RHO, lVs, weights] = cv_projection(data, weights, correlation_method, matrix_norm)
 
 for i=1:length(data)
     lVs(:,i) = data{i}*weights{i};
@@ -25,11 +25,12 @@ if size(lVs,2) == 2
     end
 else
     corr_lVs = corr(lVs,'Type', correlation_method );
-    mnfrob = norm(corr_lVs, 'fro');
-    mn1 = norm(corr_lVs, 1);
-    mn2 = norm(corr_lVs, 2);
-    mnInf = norm(corr_lVs, Inf);
-    RHO = mn2;
+    if exists(matrix_norm)
+        mn = norm(corr_lVs, matrix_norm); % 'fro', 1, 2, Inf
+    else
+        mn = norm(corr_lVs, 2);
+    end
+    RHO = mn;
 end
 
 

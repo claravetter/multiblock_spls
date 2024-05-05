@@ -1,5 +1,5 @@
 <deployment-project plugin="plugin.ezdeploy" plugin-version="1.0">
-  <configuration build-checksum="966735666" file="/volume/projects/CV_gs_PLS/ScrFun/multiblock_spls/cv_gspls_standalone_Dev_2024.prj" location="/volume/projects/CV_gs_PLS/ScrFun/multiblock_spls" name="cv_gspls_standalone_Dev_2024" preferred-package-location="/volume/projects/CV_gs_PLS/ScrFun/multiblock_spls/cv_gspls_standalone_Dev_2024/for_redistribution" preferred-package-type="package.type.install" target="target.ezdeploy.standalone" target-name="Application Compiler">
+  <configuration file="/volume/projects/CV_gs_PLS/ScrFun/multiblock_spls/cv_gspls_standalone_Dev_2024.prj" location="/volume/projects/CV_gs_PLS/ScrFun/multiblock_spls" name="cv_gspls_standalone_Dev_2024" target="target.ezdeploy.standalone" target-name="Application Compiler">
     <param.appname>cv_gspls_standalone_Dev_2024</param.appname>
     <param.icon />
     <param.icons />
@@ -96,58 +96,7 @@ ${LD_LIBRARY_PATH}:MR/v912/runtime/glnxa64:MR/v912/bin/glnxa64:MR/v912/sys/os/gl
     </fileset.main>
     <fileset.resources />
     <fileset.package />
-    <fileset.depfun>
-      <file>/opt/NM/NeuroMiner_Current/nk_CVpartition.m</file>
-      <file>/opt/NM/NeuroMiner_Current/nk_EqualizeHisto.m</file>
-      <file>/opt/NM/NeuroMiner_Current/nk_PermInd2.m</file>
-      <file>/opt/NM/NeuroMiner_Current/preproc/SparsePLS/proj_def.m</file>
-      <file>/opt/NM/NeuroMiner_Current/preproc/combat/aprior.m</file>
-      <file>/opt/NM/NeuroMiner_Current/preproc/combat/bprior.m</file>
-      <file>/opt/NM/NeuroMiner_Current/preproc/combat/combat.m</file>
-      <file>/opt/NM/NeuroMiner_Current/preproc/combat/itSol.m</file>
-      <file>/opt/NM/NeuroMiner_Current/preproc/combat/postmean.m</file>
-      <file>/opt/NM/NeuroMiner_Current/preproc/combat/postvar.m</file>
-      <file>/opt/NM/NeuroMiner_Current/preproc/cv_icaHarmonize.m</file>
-      <file>/opt/NM/NeuroMiner_Current/preproc/nk_PartialCorrelationsObj.m</file>
-      <file>/opt/NM/NeuroMiner_Current/preproc/nmfv1_4/iszero.m</file>
-      <file>/opt/NM/NeuroMiner_Current/util/allcomb.m</file>
-      <file>/opt/NM/NeuroMiner_Current/util/wmean.m</file>
-      <file>/opt/NM/test_versions/NeuroMiner_Current_CVFork/NeuroMiner_Current/preproc/FastICA_25/fastica.m</file>
-      <file>/opt/NM/test_versions/NeuroMiner_Current_CVFork/NeuroMiner_Current/preproc/FastICA_25/fpica.m</file>
-      <file>/opt/NM/test_versions/NeuroMiner_Current_CVFork/NeuroMiner_Current/preproc/FastICA_25/icaplot.m</file>
-      <file>/opt/NM/test_versions/NeuroMiner_Current_CVFork/NeuroMiner_Current/preproc/FastICA_25/pcamat.m</file>
-      <file>/opt/NM/test_versions/NeuroMiner_Current_CVFork/NeuroMiner_Current/preproc/FastICA_25/remmean.m</file>
-      <file>/opt/NM/test_versions/NeuroMiner_Current_CVFork/NeuroMiner_Current/preproc/FastICA_25/whitenv.m</file>
-      <file>${PROJECT_ROOT}/scripts/SPLS_Toolbox/cv_ICV_bash_job_mult.m</file>
-      <file>${PROJECT_ROOT}/scripts/SPLS_Toolbox/cv_ICV_main_csv_mult.m</file>
-      <file>${PROJECT_ROOT}/scripts/SPLS_Toolbox/cv_gspls.m</file>
-      <file>${PROJECT_ROOT}/scripts/SPLS_Toolbox/cv_gspls_full.m</file>
-      <file>${PROJECT_ROOT}/scripts/SPLS_Toolbox/cv_master_correctscale.m</file>
-      <file>${PROJECT_ROOT}/scripts/SPLS_Toolbox/cv_projection.m</file>
-      <file>${PROJECT_ROOT}/scripts/SPLS_Toolbox/cv_weights_ext.m</file>
-      <file>${PROJECT_ROOT}/scripts/SPLS_Toolbox/dp_HOpartition.m</file>
-      <file>${PROJECT_ROOT}/scripts/SPLS_Toolbox/dp_ICV_bash_job_mult.m</file>
-      <file>${PROJECT_ROOT}/scripts/SPLS_Toolbox/dp_ICV_main_csv_mult.m</file>
-      <file>${PROJECT_ROOT}/scripts/SPLS_Toolbox/dp_LSOVpartition.m</file>
-      <file>${PROJECT_ROOT}/scripts/SPLS_Toolbox/dp_auc_testing.m</file>
-      <file>${PROJECT_ROOT}/scripts/SPLS_Toolbox/dp_corrections.m</file>
-      <file>${PROJECT_ROOT}/scripts/SPLS_Toolbox/dp_correctscale.m</file>
-      <file>${PROJECT_ROOT}/scripts/SPLS_Toolbox/dp_create_folders.m</file>
-      <file>${PROJECT_ROOT}/scripts/SPLS_Toolbox/dp_cu_cv_ext.m</file>
-      <file>${PROJECT_ROOT}/scripts/SPLS_Toolbox/dp_master_correctscale.m</file>
-      <file>${PROJECT_ROOT}/scripts/SPLS_Toolbox/dp_multiple_testing.m</file>
-      <file>${PROJECT_ROOT}/scripts/SPLS_Toolbox/dp_projection.m</file>
-      <file>${PROJECT_ROOT}/scripts/SPLS_Toolbox/dp_projection_ext.m</file>
-      <file>${PROJECT_ROOT}/scripts/SPLS_Toolbox/dp_setup_framework.m</file>
-      <file>${PROJECT_ROOT}/scripts/SPLS_Toolbox/dp_setup_parameters.m</file>
-      <file>${PROJECT_ROOT}/scripts/SPLS_Toolbox/dp_spls.m</file>
-      <file>${PROJECT_ROOT}/scripts/SPLS_Toolbox/dp_spls_full.m</file>
-      <file>${PROJECT_ROOT}/scripts/SPLS_Toolbox/dp_standardize.m</file>
-      <file>${PROJECT_ROOT}/scripts/SPLS_Toolbox/dp_standardize_comb.m</file>
-      <file>${PROJECT_ROOT}/scripts/SPLS_Toolbox/dp_trainmerge_single.m</file>
-      <file>${PROJECT_ROOT}/scripts/SPLS_Toolbox/fdr_BH.m</file>
-      <file>${PROJECT_ROOT}/scripts/SPLS_Toolbox/proj_def_single.m</file>
-    </fileset.depfun>
+    <fileset.depfun />
     <build-deliverables>
       <file location="${PROJECT_ROOT}/cv_gspls_standalone_Dev_2024/for_testing" name="readme.txt" optional="true">/volume/projects/CV_gs_PLS/ScrFun/multiblock_spls/cv_gspls_standalone_Dev_2024/for_testing/readme.txt</file>
       <file location="${PROJECT_ROOT}/cv_gspls_standalone_Dev_2024/for_testing" name="run_cv_gspls_standalone_Dev_2024.sh" optional="false">/volume/projects/CV_gs_PLS/ScrFun/multiblock_spls/cv_gspls_standalone_Dev_2024/for_testing/run_cv_gspls_standalone_Dev_2024.sh</file>

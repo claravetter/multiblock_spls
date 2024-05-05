@@ -26,7 +26,7 @@ setup.analysis_folder       = ['/volume/projects/CV_gs_PLS/Analysis', setup.date
 setup.queue_name            = 'all.q'; % Choose queue for master and slave jobs, choose between psy0cf20 and mitnvp1-2 and all.q
 setup.email                 = 'clara.vetter@med.uni-muenchen.de'; % your email address
 setup.max_sim_jobs          = 1; % Define how many parallel jobs are created
-setup.parallel_jobs         = 20; % Define how many jobs run in parallel at the same time (soft threshold)
+setup.parallel_jobs         = 1; % Define how many jobs run in parallel at the same time (soft threshold)
 setup.mem_request           = 5; % Memory request for master and slave jobs, in GB, maybe decrease to 2 or 3
 setup.matlab_version        = 'R2022b'; % Define the runtime engine, currently its R2020b
 setup.cache_path            = '/volume/mitnvp1_scratch/CV_SPLS'; % Path for output text files during hyperopt, permutation, bootstrapping => generally same as scratch space

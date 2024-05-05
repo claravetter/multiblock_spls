@@ -1,5 +1,5 @@
 
-function [RHO] = cv_gspls_slim(training_data, test_data, cs, correlation_method, Vs_original)
+function [RHO] = cv_gspls_slim(training_data, test_data, cs, correlation_method, Vs_original, matrix_norm)
 
 % CV: implement as user input
 num_matrices = length(training_data);
@@ -18,6 +18,6 @@ end
 %compute the correlation between the projections of the training and
 %test matrices onto the SPLS latent space spanned by the weight vectors
 
-RHO = cv_projection(test_data, weights, correlation_method);
+RHO = cv_projection(test_data, weights, correlation_method, matrix_norm);
  
 end

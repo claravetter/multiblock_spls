@@ -47,9 +47,9 @@ for ii=1:m_setup.size_sets_permutation
     [OUT_matrices] = cv_master_correctscale(IN_matrices, COV, cs_method_permutation, m_setup.correction_target);
     
     if ~islogical(m_opt.Vs_opt)
-        RHO_collection_ICV(ii,1) = cv_gspls_slim(OUT_matrices.train, OUT_matrices.test, m_opt.c_weights_opt, m_setup.correlation_method, m_opt.Vs_opt);
+        RHO_collection_ICV(ii,1) = cv_gspls_slim(OUT_matrices.train, OUT_matrices.test, m_opt.c_weights_opt, m_setup.correlation_method, m_opt.Vs_opt, m_setup.matrix_norm);
     else
-        RHO_collection_ICV(ii,1) = cv_gspls_slim(OUT_matrices.train, OUT_matrices.test, m_opt.c_weights_opt, m_setup.correlation_method);
+        RHO_collection_ICV(ii,1) = cv_gspls_slim(OUT_matrices.train, OUT_matrices.test, m_opt.c_weights_opt, m_setup.correlation_method, [], m_setup.matrix_norm);
     end
 end
 

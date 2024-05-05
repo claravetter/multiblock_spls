@@ -15,7 +15,7 @@ setup.date                  = date; % automatic date
 setup.analysis_folder       = ['/volume/projects/CV_gs_PLS/Analysis/', setup.date]; % analysis folder is created automatically using the current date
 setup.queue_name            = 'all.q'; % Choose queue for master and slave jobs, choose between psy0cf20 and mitnvp1-2 and all.q
 setup.email                 = 'clara.vetter@med.uni-muenchen.de'; % your email address
-setup.max_sim_jobs          = 25; % Define how many parallel jobs are created
+setup.max_sim_jobs          = 50; % Define how many parallel jobs are created
 setup.parallel_jobs         = 25; % Define how many jobs run in parallel at the same time (soft threshold)
 setup.mem_request           = 5; % Memory request for master and slave jobs, in GB, maybe decrease to 2 or 3
 setup.matlab_version        = 'R2022a'; % Define the runtime engine, currently its R2020b
@@ -43,8 +43,8 @@ input.DiagNames             = cellstr("group" + input.Diag); % input.data_comple
 % TO DO: change to matrices (cell array)
 %input.X = matrices{1}; 
 %input.Y = matrices{2};
-matrices13 = {matrices{1}, matrices{3}};
-input.matrices              = matrices13; % 1st data matrix, usually for MRI/biological data, if applicable. If MRI data, then either put in the path to a Matlab file, containing only one variable with vectorized MRI data, or put in vectorized MRI data itself, otherwise just put in the matrix (double format)
+matrices_2 = {matrices{1}, matrices{2}};
+input.matrices              = matrices_2; % 1st data matrix, usually for MRI/biological data, if applicable. If MRI data, then either put in the path to a Matlab file, containing only one variable with vectorized MRI data, or put in vectorized MRI data itself, otherwise just put in the matrix (double format)
 input.matrix_names               = []; % define names of features in X, if MRI data, or no names applicable, leave empty
 %input.Y                     = Y_final.Variables; % 2nd data matrix, usually for behavioral/phenotypical data (double format) 
 %input.Y_names               = Y_final.Properties.VariableNames; % define names of features in X, if no names applicable, leave empty
@@ -52,10 +52,10 @@ input.matrix_names               = []; % define names of features in X, if MRI d
 
 % Define ML framework
 input.framework             = 1; % Cross-validation setup: 1 = nested cross-validation, 2 = random hold-out splits, 3 = LOSOCV, 4 = random split-half
-input.outer_folds           = 2; % Applicable only for nested cross-validation and Random Hold-Out Splits: Define Outer folds CV2
-input.inner_folds           = 2; % Applicable only for nested cross-validation and Random Hold-Out Splits: Define Inner folds CV1
-input.permutation_testing   = 400; % Number of permutations for significance testing of each LV, default: 5000
-input.bootstrap_testing     = 120; % Number of bootstrap samples to measure Confidence intervals and bootstrap ratios for feature weights within LV: default 500 (100 also possible)
+input.outer_folds           = 5; % Applicable only for nested cross-validation and Random Hold-Out Splits: Define Outer folds CV2
+input.inner_folds           = 5; % Applicable only for nested cross-validation and Random Hold-Out Splits: Define Inner folds CV1
+input.permutation_testing   = 5000; % Number of permutations for significance testing of each LV, default: 5000
+input.bootstrap_testing     = 500; % Number of bootstrap samples to measure Confidence intervals and bootstrap ratios for feature weights within LV: default 500 (100 also possible)
 input.correlation_method    = 'Spearman'; % Define which correlation method is used to compute correlation between latent scores of X and Y (used for significance testing of LV): default 'Spearman', also possible 'Pearson'
 input.cs_method.method      = 'mean-centering'; % Scaling of features, default: mean-centering, also possible 'min_max' (scaling from 0 to 1) => preferred scaling is mean-centering!
 input.cs_method.correction_subgroup = 'group1'; % Define whether you want to correct the covariates based on the betas of a subgroup, or simply across all individuals => for subgroup-based correction use the label, i.e., 'HC' or 'ROD, etc. Otherwise leave as empty string: ''.
@@ -90,7 +90,7 @@ input.grid_dynamic.onset    = 1; % Choose the marks for grid applications, defau
 
 % TO DO: grid needs to be defined based on number of matrices; better to
 % add this as cell also 
-input.density               = num2cell([10, 10]); % should this be the same for all matrices or per matrix? 
+input.density               = num2cell([20, 20]); % should this be the same for all matrices or per matrix? 
 input.grid_dynamic.LVs   = cellfun(@create_grid, input.density); 
 %input.grid_dynamic.LV_1.x   = struct('start', 1, 'end', 0, 'density', input.density); 
 %input.grid_dynamic.LV_1.y   = struct('start', 1, 'end', 0, 'density', input.density);
@@ -105,7 +105,7 @@ input.grid_dynamic.LVs   = cellfun(@create_grid, input.density);
 
 %% Create analysis datafile
 
-input.name = ['CV_gspls_2matrices_matrices13_', num2str(input.outer_folds), 'x', num2str(input.inner_folds), '_', num2str(input.permutation_testing), 'perm_', num2str(input.bootstrap_testing), 'boot_', num2str(input.density{1}), 'density']; 
+input.name = ['CV_gspls_2matrices_matrices12_', num2str(input.outer_folds), 'x', num2str(input.inner_folds), '_', num2str(input.permutation_testing), 'perm_', num2str(input.bootstrap_testing), 'boot_', num2str(input.density{1}), 'density']; 
 
 input.datafile = [setup.analysis_folder, '/' setup.date, '_', input.name, '_datafile.mat']; % Path for storing datafile containing input and setup
 
@@ -117,7 +117,7 @@ save([input.datafile], 'setup', 'input'); % Saves datafile in analysis folder
 %    disp('no deletion');
 %end
 addpath(genpath('/volume/projects/CV_gs_PLS/ScrFun/multiblock_spls/scripts/'))
-addpath(genpath('/opt/NM/NeuroMiner_Current'))
+addpath(genpath('/opt/NM/test_versions/NeuroMiner_Current'))
 
 
 

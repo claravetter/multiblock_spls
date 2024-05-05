@@ -58,7 +58,7 @@ switch type_analysis
                     weights_collection_temp = readmatrix(path_file);
                     weights_collection{j} = [weights_collection{j}, weights_collection_temp];
 
-                    weights_ICV{j} = weights_collection;
+                    weights_ICV = weights_collection;
                     delete(path_file);
                 end
 

@@ -34,7 +34,7 @@ end
 cd(final_results);
 
 %% Set parameters for SPLS analysis
-[input, setup, matrices, X, Y, B, K, W, OB, IB, size_sets_permutation, size_sets_bootstrap, correlation_method, cs_method, selection_train, selection_retrain, correction_target] = dp_setup_parameters(input, setup);
+[input, setup, matrices, X, Y, B, K, W, OB, IB, size_sets_permutation, size_sets_bootstrap, correlation_method, cs_method, selection_train, selection_retrain, correction_target, matrix_norm] = cv_setup_parameters(input, setup);
 
 % define column names for matrices so that you can access them later by
 % indexing
@@ -192,8 +192,8 @@ if rest_boot>0
 end
 boot_sets = (input.bootstrap_testing - rest_boot)/size_sets_bootstrap;
 
-save([permutation_folder '/permutation_setup.mat'],'selection_train', 'correlation_method', 'size_sets_permutation', 'perm_coding', 'selection_retrain', 'correction_target', '-v7.3');
-save([bootstrap_folder '/bootstrap_setup.mat'],'selection_train', 'correlation_method', 'size_sets_bootstrap', 'correction_target', '-v7.3');
+save([permutation_folder '/permutation_setup.mat'],'selection_train', 'correlation_method', 'matrix_norm', 'size_sets_permutation', 'perm_coding', 'selection_retrain', 'correction_target', '-v7.3');
+save([bootstrap_folder '/bootstrap_setup.mat'],'selection_train', 'correlation_method', 'matrix_norm', 'size_sets_bootstrap', 'correction_target', '-v7.3');
 
 % set count for not significant LVs to 0, as soon as one LV is not
 % significant, the LV loop stops
@@ -339,7 +339,7 @@ while count_ns<input.coun_ts_limit
                 save([hyperopt_folder '/hyperopt_partition.mat'],...
                     'train_data_x', 'train_data_y', 'train_covariates', 'cs_method',...
                     'train_DiagNames', 'test_DiagNames',...
-                    'cv_inner_TrainInd', 'cv_inner_TestInd','correlation_method',...
+                    'cv_inner_TrainInd', 'cv_inner_TestInd','correlation_method','matrix_norm', ...
                     'cu_cv_combination', 'size_sets_hyperopt', 'correction_target', '-v7.3');
 
                 if selection_train == 2 && ob == OB
@@ -352,7 +352,7 @@ while count_ns<input.coun_ts_limit
                 save([hyperopt_folder '/hyperopt_partition.mat'],...
                     'train_data_matrices', 'train_covariates', 'cs_method',...
                     'train_DiagNames', 'test_DiagNames',...
-                    'cv_inner_TrainInd', 'cv_inner_TestInd','correlation_method',...
+                    'cv_inner_TrainInd', 'cv_inner_TestInd','correlation_method', 'matrix_norm', ...
                     'weights_combination', 'size_sets_hyperopt', 'correction_target', '-v7.3');
 
                 if selection_train == 2 && ob == OB
@@ -469,7 +469,7 @@ while count_ns<input.coun_ts_limit
                                 [RHO_opt_collection(1,ob), u_opt_collection(:,ob), v_opt_collection(:,ob), V_opt_collection_temp, epsilon_opt_temp, omega_opt_temp] = dp_spls_full(OUT_x.train,OUT_y.train,OUT_x.test, OUT_y.test, cu_opt, cv_opt, correlation_method);
                                 V_opt_collection = cat(3, V_opt_collection, V_opt_collection_temp);
                             else
-                                [RHO_opt_collection(1,ob), weights_opt_collection(:,ob), Vs_opt_collection_temp] = cv_gspls_full(OUT_matrices.train, OUT_matrices.test, c_weights_opt, correlation_method);;
+                                [RHO_opt_collection(1,ob), weights_opt_collection(:,ob), Vs_opt_collection_temp] = cv_gspls_full(OUT_matrices.train, OUT_matrices.test, c_weights_opt, correlation_method, matrix_norm);
                                 Vs_opt_collection = cat(3, Vs_opt_collection, Vs_opt_collection_temp);
                             end
 
@@ -515,7 +515,7 @@ while count_ns<input.coun_ts_limit
                                 weights_collection = weight_selection(I_max,:)';
                                 Vs_opt_collection = false;
                                 test_data = cellfun(@(x) (x.test), OUT_matrices);
-                                [RHO_opt_collection(1,ob), lVs_opt_temp, weights_opt_collection] = cv_projection(test_data, weights_opt_collection, correlation_method);
+                                [RHO_opt_collection(1,ob), lVs_opt_temp, weights_opt_collection] = cv_projection(test_data, weights_opt_collection, correlation_method, matrix_norm);
 
                                 for num_m=1:num_matrices
                                     lVs_opt_collection{num_m} = cat(1, lVs_opt_collection{num_m}, lVs_opt_temp{num_m});
@@ -759,7 +759,7 @@ while count_ns<input.coun_ts_limit
                             [RHO_opt_collection(1,nn), u_opt_collection(:,nn), v_opt_collection(:,nn), V_opt_collection_temp, epsilon_opt_temp, omega_opt_temp] = dp_spls_full(OUT_x.train,OUT_y.train,OUT_x.test, OUT_y.test, cu_opt, cv_opt, correlation_method);
                             V_opt_collection = cat(3, V_opt_collection, V_opt_collection_temp);
                         else
-                            [RHO_opt_collection(1,nn), weights_opt_collection(:,nn), Vs_opt_collection_temp, lVs_opt_temp] = cv_gspls_full(OUT_matrices.train, OUT_matrices.test, c_weights_opt, correlation_method);
+                            [RHO_opt_collection(1,nn), weights_opt_collection(:,nn), Vs_opt_collection_temp, lVs_opt_temp] = cv_gspls_full(OUT_matrices.train, OUT_matrices.test, c_weights_opt, correlation_method, matrix_norm);
                             Vs_opt_collection = cat(3, Vs_opt_collection, Vs_opt_collection_temp);
                         end
 
@@ -812,7 +812,7 @@ while count_ns<input.coun_ts_limit
                             weights_opt_collection = weights_selection(I_max,:)';
                             Vs_opt_collection = false;
 
-                            [RHO_opt_collection(1,nn), lVs_opt_temp, weights_opt_collection] = cv_projection(OUT_matrices.test, weights_opt_collection, vcorrelation_method);
+                            [RHO_opt_collection(1,nn), lVs_opt_temp, weights_opt_collection] = cv_projection(OUT_matrices.test, weights_opt_collection, correlation_method, matrix_norm);
 
 
                             for num_m=1:num_matrices
@@ -1200,12 +1200,13 @@ while count_ns<input.coun_ts_limit
             weights_analysis{num_m} = output.final_parameters{ff, matches(output.opt_parameters_names, 'weights')}{num_m};
 
 
-            weights_mean{num_m} = mean(weights_boot{num_m}{1},2);
-            weights_SE{num_m} = std(weights_boot{num_m}{1},0,2)/(sqrt(input.bootstrap_testing));
+            weights_mean{num_m} = mean(weights_boot{num_m},2);
+            weights_SE{num_m} = std(weights_boot{num_m},0,2)/(sqrt(input.bootstrap_testing));
 
             bs_ratio_weights{num_m} = weights_analysis{num_m}./weights_SE{num_m};
             bs_ratio_weights{num_m}(isnan(bs_ratio_weights{num_m})) = 0;
             bs_ratio_weights{num_m}(bs_ratio_weights{num_m} == Inf) = 0;
+            bs_ratio_weights{num_m}(bs_ratio_weights{num_m} == -Inf) = 0; % CV added; correct? 
             log_bs_weights{num_m} = abs(bs_ratio_weights{num_m})<=2;
 
             ci_weights{num_m} = [weights_mean{num_m} - 1.96 * weights_SE{num_m}, weights_mean{num_m} + 1.96 * weights_SE{num_m}];
@@ -1272,7 +1273,7 @@ while count_ns<input.coun_ts_limit
                     train_data_y = OUT_y.train;
                     test_data_y = OUT_y.test;
                 else
-                    [RHO_opt, weights_opt, ~, lVs_val] = cv_gspls_full(OUT_matrices.train,OUT_matrices.test, c_weights_opt, correlation_method);
+                    [RHO_opt, weights_opt, ~, lVs_val] = cv_gspls_full(OUT_matrices.train,OUT_matrices.test, c_weights_opt, correlation_method, matrix_norm);
 
                     train_data_matrices = OUT_matrices.train;
                     test_data_matrices = OU_matrices.test;
@@ -1286,8 +1287,8 @@ while count_ns<input.coun_ts_limit
 
                 selection_train=1;
 
-                save([permutation_folder '/permutation_setup.mat'],'selection_train', 'correlation_method', 'size_sets_permutation', 'perm_coding', 'correction_target', '-v7.3');
-                save([bootstrap_folder '/bootstrap_setup.mat'],'selection_train', 'correlation_method', 'size_sets_bootstrap', 'selection_retrain', 'correction_target', 'bs_method', '-v7.3');
+                save([permutation_folder '/permutation_setup.mat'],'selection_train', 'correlation_method', 'matrix_norm', 'size_sets_permutation', 'perm_coding', 'correction_target', '-v7.3');
+                save([bootstrap_folder '/bootstrap_setup.mat'],'selection_train', 'correlation_method', 'matrix_norm', 'size_sets_bootstrap', 'selection_retrain', 'correction_target', 'bs_method', '-v7.3');
 
 
                 if ~isempty(X)
@@ -1307,8 +1308,8 @@ while count_ns<input.coun_ts_limit
 
 
                 selection_train=input.selection_train;
-                save([permutation_folder '/permutation_setup.mat'],'selection_train', 'correlation_method', 'size_sets_permutation', 'perm_coding', 'correction_target', '-v7.3');
-                save([bootstrap_folder '/bootstrap_setup.mat'],'selection_train', 'correlation_method', 'size_sets_bootstrap', 'selection_retrain', 'correction_target', 'bs_method', '-v7.3');
+                save([permutation_folder '/permutation_setup.mat'],'selection_train', 'correlation_method', 'matrix_norm', 'size_sets_permutation', 'perm_coding', 'correction_target', '-v7.3');
+                save([bootstrap_folder '/bootstrap_setup.mat'],'selection_train', 'correlation_method', 'matrix_norm', 'size_sets_bootstrap', 'selection_retrain', 'correction_target', 'bs_method', '-v7.3');
 
             case 2 % apply optimal u and v
 
@@ -1320,10 +1321,10 @@ while count_ns<input.coun_ts_limit
                     end
 
                 else
-                    [RHO_opt, lVs_val, weights_opt] = cv_projection(OUT_matrices.test, weights_opt, correlation_method);
+                    [RHO_opt, lVs_val, weights_opt] = cv_projection(OUT_matrices.test, weights_opt, correlation_method, matrix_norm);
 
                     for pp=1:size(weights_b_collection,1)
-                        [RHO_b_collection(pp,1), ~, ~, ~, ~] = cv_projection(OUT_matrices.test, weights_b_collection(pp,:)', correlation_method);
+                        [RHO_b_collection(pp,1), ~, ~, ~, ~] = cv_projection(OUT_matrices.test, weights_b_collection(pp,:)', correlation_method, matrix_norm);
                     end
 
                 end
@@ -1341,7 +1342,7 @@ while count_ns<input.coun_ts_limit
                 IN.testing_precision = input.permutation_testing_precision;
                 [p, ~] = dp_auc_testing(IN);
             case 3 % regular correlation testing
-                [RHO_opt, p, epsilon_val, omega_val, u_opt, v_opt] = dp_projection_ext(OUT_x.test, OUT_y.test, u_opt, v_opt, correlation_method);
+                [RHO_opt, p, epsilon_val, omega_va  l, u_opt, v_opt] = dp_projection_ext(OUT_x.test, OUT_y.test, u_opt, v_opt, correlation_method);
         end
 
         success_val=true;

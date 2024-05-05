@@ -73,7 +73,7 @@ for i = 1:num_matrices
 
             %--- Perform Procrustes Rotation if permutation flag is set
             % Vs{i,j} = nk_Procrustes(Vs_original{i,j},Vs_resampled{i,j});
-            Vs{i,j} = procrustes(Vs_original{i,j},Vs_resampled{i,j});
+            [~,Vs{i,j}] = procrustes(Vs_original{i,j},Vs_resampled{i,j});
 
         else
             %--- compute SVD

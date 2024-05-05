@@ -19,6 +19,6 @@ end
 %compute the correlation between the projections of the training and
 %test matrices onto the SPLS latent space spanned by the weight vectors
 
-[RHO, lVs, weights] = cv_projection(test_data, weights, correlation_method);
+[RHO, lVs, weights] = cv_projection(test_data, weights, correlation_method, matrix_norm);
  
 end

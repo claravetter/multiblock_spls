@@ -12,11 +12,11 @@ load("/volume/projects/CV_gs_PLS/Data/mri_plexus_clinical_matrices.mat")
 % Parameters for IT infrastructure
 setup.spls_standalone_path  = '/volume/projects/CV_gs_PLS/ScrFun/multiblock_spls'; % Path of the SPLS Toolbox                 = date; % automatic date
 setup.date                  = date; % automatic date
-setup.analysis_folder       = ['/volume/projects/CV_gs_PLS/Analysis', setup.date]; % analysis folder is created automatically using the current date
+setup.analysis_folder       = ['/volume/projects/CV_gs_PLS/Analysis/PLEXUS/', setup.date]; % analysis folder is created automatically using the current date
 setup.queue_name            = 'all.q'; % Choose queue for master and slave jobs, choose between psy0cf20 and mitnvp1-2 and all.q
 setup.email                 = 'clara.vetter@med.uni-muenchen.de'; % your email address
-setup.max_sim_jobs          = 40; % Define how many parallel jobs are created
-setup.parallel_jobs         = 22; % Define how many jobs run in parallel at the same time (soft threshold)
+setup.max_sim_jobs          = 50; % Define how many parallel jobs are created
+setup.parallel_jobs         = 25; % Define how many jobs run in parallel at the same time (soft threshold)
 setup.mem_request           = 5; % Memory request for master and slave jobs, in GB, maybe decrease to 2 or 3
 setup.matlab_version        = 'R2022a'; % Define the runtime engine, currently its R2020b
 setup.cache_path            = '/volume/mitnvp1_scratch/CV_SPLS'; % Path for output text files during hyperopt, permutation, bootstrapping => generally same as scratch space
@@ -51,9 +51,9 @@ input.matrix_names               = []; % define names of features in X, if MRI d
 
 % Define ML framework
 input.framework             = 1; % Cross-validation setup: 1 = nested cross-validation, 2 = random hold-out splits, 3 = LOSOCV, 4 = random split-half
-input.outer_folds           = 2; % Applicable only for nested cross-validation and Random Hold-Out Splits: Define Outer folds CV2
-input.inner_folds           = 2; % Applicable only for nested cross-validation and Random Hold-Out Splits: Define Inner folds CV1
-input.permutation_testing   = 1000; % Number of permutations for significance testing of each LV, default: 5000
+input.outer_folds           = 10; % Applicable only for nested cross-validation and Random Hold-Out Splits: Define Outer folds CV2
+input.inner_folds           = 10; % Applicable only for nested cross-validation and Random Hold-Out Splits: Define Inner folds CV1
+input.permutation_testing   = 5000; % Number of permutations for significance testing of each LV, default: 5000
 input.bootstrap_testing     = 100; % Number of bootstrap samples to measure Confidence intervals and bootstrap ratios for feature weights within LV: default 500 (100 also possible)
 input.correlation_method    = 'Spearman'; % Define which correlation method is used to compute correlation between latent scores of X and Y (used for significance testing of LV): default 'Spearman', also possible 'Pearson'
 input.cs_method.method      = 'mean-centering'; % Scaling of features, default: mean-centering, also possible 'min_max' (scaling from 0 to 1) => preferred scaling is mean-centering!
@@ -89,7 +89,7 @@ input.grid_dynamic.onset    = 1; % Choose the marks for grid applications, defau
 
 % TO DO: grid needs to be defined based on number of matrices; better to
 % add this as cell also 
-input.density               = num2cell([10, 10, 10]); % should this be the same for all matrices or per matrix? 
+input.density               = num2cell([40, 40, 40]); % should this be the same for all matrices or per matrix? 
 input.grid_dynamic.LVs   = cellfun(@create_grid, input.density); 
 %input.grid_dynamic.LV_1.x   = struct('start', 1, 'end', 0, 'density', input.density); 
 %input.grid_dynamic.LV_1.y   = struct('start', 1, 'end', 0, 'density', input.density);
@@ -104,33 +104,15 @@ input.grid_dynamic.LVs   = cellfun(@create_grid, input.density);
 
 %% Create analysis datafile
 
-input.name = ['CV_gspls_simulated_mini_test_', num2str(input.outer_folds), 'x', num2str(input.inner_folds), '_', num2str(input.permutation_testing), 'perm_', num2str(input.bootstrap_testing), 'boot_', num2str(input.density{1}), 'density']; 
+input.name = ['CV_gspls_plexus_mri_clinical_', num2str(input.outer_folds), 'x', num2str(input.inner_folds), '_', num2str(input.permutation_testing), 'perm_', num2str(input.bootstrap_testing), 'boot_', num2str(input.density{1}), 'density']; 
 
 input.datafile = [setup.analysis_folder, '/' setup.date, '_', input.name, '_datafile.mat']; % Path for storing datafile containing input and setup
 
 mkdir(setup.analysis_folder); % Creates analysis folder
 save([input.datafile], 'setup', 'input'); % Saves datafile in analysis folder
 
-%try rmdir('/volume/mitnvp1_scratch/CW_Med/.mcrCache9.9', 's'); % Cleans your scratch space, be careful: only do this when you have nothing running in the queue
-%catch
-%    disp('no deletion');
-%end
+
 cv_gspls_bash_main_job_slim_addedruntime_mult(input.datafile);
-%dp_bash_main_job_slim_addedruntime_mult(input.datafile); % Start the
-%analysis (dann ist Matlab nicht blockiert) 
-%% start analysis
-% datafile = input.datafile;
-% 
-% addpath(genpath('/volume/projects/CV_gs_PLS/ScrFun/multiblock_spls/scripts/'))
-% addpath(genpath('/opt/NM/NeuroMiner_Current'))
-% 
-% %%
-% standalone = 1;
-% if standalone
-%     cv_gspls_standalone_Dev_2024(input.datafile)
-% else
-%     cv_run_gspls_Dev_2024(input.datafile)
-% end
 
 %%
 function grid = create_grid(density)

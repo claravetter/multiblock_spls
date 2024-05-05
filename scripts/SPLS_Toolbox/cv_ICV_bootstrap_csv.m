@@ -26,7 +26,7 @@ correction_target = m_setup.correction_target;
 
 % perform procrustean transformation to minimize rotation effects of
 % permutated y matrix, if V_opt available
-RHO_boot=[]; u_boot=[]; v_boot=[];
+RHO_boot=[]; weights_boot={};
 for ii=1:size(bootsam,2)
 
         for num_m=1:length(matrices)
@@ -45,9 +45,9 @@ for ii=1:size(bootsam,2)
 
     
     if ~islogical(m_opt.Vs_opt)
-        [RHO_boot(1,ii), weights_boot(:,ii), ~, ~] = cv_gspls_full(OUT_matrices, OUT_matrices, c_weights, m_setup.correlation_method, m_opt.Vs_opt);
+        [RHO_boot(1,ii), weights_boot(:,ii), ~, ~] = cv_gspls_full(OUT_matrices, OUT_matrices, c_weights, m_setup.correlation_method, m_opt.Vs_opt, m_setup.matrix_norm);
     else
-        [RHO_boot(1,ii), weights_boot(:,ii), ~, ~] = cv_gspls_full(OUT_matrices, OUT_matrices, c_weights, m_setup.correlation_method);
+        [RHO_boot(1,ii), weights_boot(:,ii), ~, ~] = cv_gspls_full(OUT_matrices, OUT_matrices, c_weights, m_setup.correlation_method, [], m_setup.matrix_norm);
     end
 end
 
@@ -60,9 +60,9 @@ end
 
 for num_m=1:length(matrices)
     if isnumeric(i)
-        writecell(weights_boot(num_m, :),[analysis_folder, '/weights_', num2str(num_m), '_results_', num2str(i), '.csv'],'Delimiter','tab')
+        writematrix(cell2mat(weights_boot(num_m,:)), [analysis_folder, '/weights_', num2str(num_m), '_results_', num2str(i), '.csv'],'Delimiter','tab')
     else
-        writecell(weights_boot(num_m, :),[analysis_folder, '/weights_', num2str(num_m), '_results_', i, '.csv'],'Delimiter','tab')
+        writematrix(cell2mat(weights_boot(num_m,:)), [analysis_folder, '/weights_', num2str(num_m), '_results_', i, '.csv'],'Delimiter','tab')
     end
 end
 

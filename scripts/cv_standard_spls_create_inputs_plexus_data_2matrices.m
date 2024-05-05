@@ -12,11 +12,11 @@ load("/volume/projects/CV_gs_PLS/Data/mri_plexus_clinical_matrices.mat")
 % Parameters for IT infrastructure
 setup.spls_standalone_path  = '/volume/projects/CV_gs_PLS/ScrFun/multiblock_spls'; % Path of the SPLS Toolbox                 = date; % automatic date
 setup.date                  = date; % automatic date
-setup.analysis_folder       = ['/volume/projects/CV_gs_PLS/Analysis', setup.date]; % analysis folder is created automatically using the current date
+setup.analysis_folder       = ['/volume/projects/CV_gs_PLS/Analysis/PLEXUS/', setup.date]; % analysis folder is created automatically using the current date
 setup.queue_name            = 'all.q'; % Choose queue for master and slave jobs, choose between psy0cf20 and mitnvp1-2 and all.q
 setup.email                 = 'clara.vetter@med.uni-muenchen.de'; % your email address
-setup.max_sim_jobs          = 40; % Define how many parallel jobs are created
-setup.parallel_jobs         = 22; % Define how many jobs run in parallel at the same time (soft threshold)
+setup.max_sim_jobs          = 50; % Define how many parallel jobs are created
+setup.parallel_jobs         = 25; % Define how many jobs run in parallel at the same time (soft threshold)
 setup.mem_request           = 5; % Memory request for master and slave jobs, in GB, maybe decrease to 2 or 3
 setup.matlab_version        = 'R2022a'; % Define the runtime engine, currently its R2020b
 setup.cache_path            = '/volume/mitnvp1_scratch/CV_SPLS'; % Path for output text files during hyperopt, permutation, bootstrapping => generally same as scratch space
@@ -42,7 +42,7 @@ input.DiagNames             = cellstr("group" + input.Diag); % input.data_comple
 % define X and Y
 % TO DO: change to matrices (cell array)
 input.X = matrices{1}; 
-input.Y = matrices{3};
+input.Y = matrices{2};
 %matrices13 = {matrices{1}, matrices{3}};
 %input.matrices              = matrices13; % 1st data matrix, usually for MRI/biological data, if applicable. If MRI data, then either put in the path to a Matlab file, containing only one variable with vectorized MRI data, or put in vectorized MRI data itself, otherwise just put in the matrix (double format)
 input.matrix_names               = []; % define names of features in X, if MRI data, or no names applicable, leave empty
@@ -52,10 +52,10 @@ input.matrix_names               = []; % define names of features in X, if MRI d
 
 % Define ML framework
 input.framework             = 1; % Cross-validation setup: 1 = nested cross-validation, 2 = random hold-out splits, 3 = LOSOCV, 4 = random split-half
-input.outer_folds           = 10; % Applicable only for nested cross-validation and Random Hold-Out Splits: Define Outer folds CV2
-input.inner_folds           = 10; % Applicable only for nested cross-validation and Random Hold-Out Splits: Define Inner folds CV1
-input.permutation_testing   = 1000; % Number of permutations for significance testing of each LV, default: 5000
-input.bootstrap_testing     = 200; % Number of bootstrap samples to measure Confidence intervals and bootstrap ratios for feature weights within LV: default 500 (100 also possible)
+input.outer_folds           = 5; % Applicable only for nested cross-validation and Random Hold-Out Splits: Define Outer folds CV2
+input.inner_folds           = 5; % Applicable only for nested cross-validation and Random Hold-Out Splits: Define Inner folds CV1
+input.permutation_testing   = 5000; % Number of permutations for significance testing of each LV, default: 5000
+input.bootstrap_testing     = 500; % Number of bootstrap samples to measure Confidence intervals and bootstrap ratios for feature weights within LV: default 500 (100 also possible)
 input.correlation_method    = 'Spearman'; % Define which correlation method is used to compute correlation between latent scores of X and Y (used for significance testing of LV): default 'Spearman', also possible 'Pearson'
 input.cs_method.method      = 'mean-centering'; % Scaling of features, default: mean-centering, also possible 'min_max' (scaling from 0 to 1) => preferred scaling is mean-centering!
 input.cs_method.correction_subgroup = 'group1'; % Define whether you want to correct the covariates based on the betas of a subgroup, or simply across all individuals => for subgroup-based correction use the label, i.e., 'HC' or 'ROD, etc. Otherwise leave as empty string: ''.
@@ -105,7 +105,7 @@ input.grid_dynamic.LV_1.y   = struct('start', 1, 'end', 0, 'density', input.dens
 
 %% Create analysis datafile
 
-input.name = ['CV_spls_2matrices_matrices13_', num2str(input.outer_folds), 'x', num2str(input.inner_folds), '_', num2str(input.permutation_testing), 'perm_', num2str(input.bootstrap_testing), 'boot_', num2str(input.density), 'density']; 
+input.name = ['CV_spls_2matrices_matrices12_', num2str(input.outer_folds), 'x', num2str(input.inner_folds), '_', num2str(input.permutation_testing), 'perm_', num2str(input.bootstrap_testing), 'boot_', num2str(input.density), 'density']; 
 
 input.datafile = [setup.analysis_folder, '/' setup.date, '_', input.name, '_datafile.mat']; % Path for storing datafile containing input and setup
 

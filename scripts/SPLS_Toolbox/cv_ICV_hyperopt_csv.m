@@ -61,7 +61,7 @@ for ii=1:size(weights_extract,1)
             OUT = cv_master_correctscale(IN, COV, cs_method_hyperopt, m.correction_target);
 
            
-            RHO_collection_ICV(ii,nn) = cv_gspls_slim(OUT.train,OUT.test, weights, m.correlation_method);
+            RHO_collection_ICV(ii,nn) = cv_gspls_slim(OUT.train,OUT.test, weights, m.correlation_method, m.matrix_norm);
         
             nn=nn+1;
         end
