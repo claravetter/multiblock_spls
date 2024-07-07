@@ -1,0 +1,37 @@
+% compilation
+
+%% first add required code repositories 
+addpath(genpath('/volume/projects/CV_gs_PLS/ScrFun/multiblock_spls/scripts/MBSPLS_Toolbox'))
+addpath(genpath('/opt/NM/NeuroMiner_Current'))
+
+%% change
+compiled_mbspls_directory = '/volume/projects/CV_gs_PLS/ScrFun/multiblock_spls';
+compiled_mbspls_name = 'cv_gspls_standalone_SLURM_Dev_2024';
+compiled_mbspls_version = 1;
+mbspls_directory = '/volume/projects/CV_gs_PLS/ScrFun/multiblock_spls/scripts/MBSPLS_Toolbox';
+mbspls_run_script = fullfile(mbspls_directory, [compiled_mbspls_name, '.m']);
+%% if hyperopt, etc are recompiled, they need to be added to the SLURM directory too 
+% good to know: when recompiling the SLURM main script, the previously added folders (hyperopt etc) are
+% not being removed
+
+compile_main = 1;
+compile_hyp = 1; 
+compile_boot = 1; 
+compile_perm = 1;
+
+%% compile main mbspls run script
+if compile_main
+eval(['mcc -o ', compiled_mbspls_name, '_v', compiled_mbspls_version, ...
+     '-W main:', compiled_mbspls_name, ...
+     ' -T link:exe -d ', fullfile(compiled_mbspls_directory, compiled_mbspls_name, 'for_testing'), ...
+     ' -v ', mbspls_run_script]); 
+end
+
+%% compile helper modules (hyperopt, bootstrap, permutation)
+if compile_hyp
+    eval(['mcc -o hyperopt_mbspls', ...
+     '-W main:', compiled_mbspls_name, ...
+     ' -T link:exe -d ', fullfile(compiled_mbspls_directory, compiled_mbspls_name, 'hyperopt_mbspls', 'for_testing'), ...
+     ' -v ', mbspls_run_script]); 
+end
+

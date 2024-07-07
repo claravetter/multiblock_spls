@@ -6,7 +6,7 @@
 clear all
 load('/Users/claravetter/local/Projects/mSPLS/20240131_testrun_realdata_mri_plexus_clinical/mri_plexus_clinical_matrices.mat')
 
-
+coreflag = 1; 
 %% Assign data for analysis in SPLS toolbox and create data and setup structure
 % Parameters for IT infrastructure
 setup.spls_standalone_path  = '/Users/claravetter/local/Code/multiblock_spls/'; % Path of the SPLS Toolboxsetup.date                  = date; % automatic date
@@ -21,6 +21,16 @@ setup.matlab_version        = 'R2022b'; % Define the runtime engine, currently i
 setup.cache_path            = '/Users/claravetter/local/Projects/mSPLS/temp/'; % Path for output text files during hyperopt, permutation, bootstrapping => generally same as scratch space
 setup.scratch_space         = '/Users/claravetter/local/Projects/mSPLS/nmcache/clvetter'; % Path for temporary file storage (hyperopt, permutation, bootstrapping) during analysis, please insert your own folder in the scratch space
 setup.compilation_subpath   = 'for_testing'; % default
+
+if coreflag
+    input.path_core             = '/data/core-psy-archive/projects/CV_temp/multiblock_tests/';
+
+ 
+    setup.spls_standalone_path  = '/data/core-psy-pronia/opt/SPLS_Toolbox_Dev_2023_CORE'; % Path of the SPLS Toolboxsetup.date                  = date; % automatic date
+    setup.analysis_folder       = [input.path_core, 'Analysis/', setup.date]; % analysis folder is created automatically using the current date
+    setup.cache_path            = '/data/core-psy/opt/temp/clvetter'; % Path for output text files during hyperopt, permutation, bootstrapping => generally same as scratch space
+    setup.scratch_space         = '/data/core-psy/opt/temp/clvetter';
+end
 
 % Accessory data input
 input.final_ID              = num2cell(1:267); % ID of your subjects (cell array)
@@ -128,7 +138,9 @@ save([input.datafile], 'setup', 'input'); % Saves datafile in analysis folder
 
 %dp_bash_main_job_slim_addedruntime_mult(input.datafile); % Start the analysis
 %%
+if ~coreflag
 cv_run_gspls_Dev_2024(input.datafile)
+end
 %%
 function grid = create_grid(density)
 grid = struct('start', 1, 'end', 0, 'density', density); 

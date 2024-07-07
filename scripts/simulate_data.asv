@@ -1,0 +1,67 @@
+function data_sim = simulate_data(sample_size, nr_variables, nr_correlated_vars, weight_correlations, thetas, sigma_correlation)
+
+N = sample_size;
+
+p1 = nr_variables(1);
+p2 = nr_variables(2);
+p3 = nr_variables(3);
+k1 = nr_correlated_vars(1);
+k2 = nr_correlated_vars(2);
+k3 = nr_correlated_vars(3);
+
+w1_cor = weight_correlations(1);
+w2_cor = weight_correlations(2);
+w3_cor = weight_correlations(3);
+
+theta1 = thetas(1);
+theta2 = thetas(2);
+
+Sigma = zeros(p1 + p2);
+Sigma(1:p1, 1:p1) = eye(p1);
+Sigma(p1 + 1:end, p1 + 1:end) = eye(p2);
+Sigma(1:k, p1 + (1:k1)) = sigma_correlation;
+Sigma(p1 + (1:k), 1:k) = sigma_correlation;
+
+% Ensure Sigma is positive semi-definite
+if min(eig(Sigma)) <= 0
+    Sigma = Sigma + eye(p1 + p2) * (1.01 - min(eig(Sigma)));
+end
+
+data = mvnrnd(zeros(1, p1 + p2), Sigma, N);
+
+X1 = data(:, 1:p1);
+X2 = data(:, p1 + 1:p1 + p2);
+
+w1 = zeros(1, p1);
+w1(1:k) = w1_cor;
+
+w2 = zeros(1, p2);
+w2(1:k) = w2_cor;
+
+ksi1 = X1 * w1';
+ksi2 = X2 * w2';
+
+meanx = theta1 * ksi1 + theta2 * ksi2;
+sdx = theta1^2 + theta2^2;
+
+ksi3 = normrnd(meanx, sqrt(abs(1 - sdx)), [N, 1]);
+
+w3 = zeros(1, p3);
+w3(1:k) = w3_cor;
+
+X3 = zeros(N, p3);
+
+for j = 1:k
+    sdx = sqrt(1 - w3(j)^2);
+    X3(:, j) = normrnd(meanx, sdx, [N, 1]);
+end
+
+for j = k + 1:p3
+    X3(:, j) = normrnd(0, 1, [N, 1]);
+end
+
+data_sim.X1 = X1;
+data_sim.X2 = X2;
+data_sim.X3 = X3;
+
+end

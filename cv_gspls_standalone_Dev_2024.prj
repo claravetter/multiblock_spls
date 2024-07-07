@@ -1,6 +1,6 @@
 <deployment-project plugin="plugin.ezdeploy" plugin-version="1.0">
-  <configuration file="/volume/projects/CV_gs_PLS/ScrFun/multiblock_spls/cv_gspls_standalone_Dev_2024.prj" location="/volume/projects/CV_gs_PLS/ScrFun/multiblock_spls" name="cv_gspls_standalone_Dev_2024" target="target.ezdeploy.standalone" target-name="Application Compiler">
-    <param.appname>cv_gspls_standalone_Dev_2024</param.appname>
+  <configuration build-checksum="2869701657" file="/volume/projects/CV_gs_PLS/ScrFun/multiblock_spls/cv_gspls_standalone_Dev_2024.prj" location="/volume/projects/CV_gs_PLS/ScrFun/multiblock_spls" name="cv_gspls_standalone_Dev_2024" preferred-package-location="/volume/projects/CV_gs_PLS/ScrFun/multiblock_spls/cv_gspls_standalone_Dev_2024/for_redistribution" preferred-package-type="package.type.install" target="target.ezdeploy.standalone" target-name="Application Compiler">
+    <param.appname>cv_mbspls_Dev_2024</param.appname>
     <param.icon />
     <param.icons />
     <param.version>1.0</param.version>
@@ -11,7 +11,7 @@
     <param.description />
     <param.screenshot />
     <param.guid />
-    <param.installpath.string>/cv_gspls_standalone_Dev_2024/</param.installpath.string>
+    <param.installpath.string>/cv_mbspls_Dev_2024/</param.installpath.string>
     <param.installpath.combo>option.installpath.user</param.installpath.combo>
     <param.logo />
     <param.install.notes />
@@ -50,8 +50,8 @@ ${LD_LIBRARY_PATH}:MR/v912/runtime/glnxa64:MR/v912/bin/glnxa64:MR/v912/sys/os/gl
     <param.checkbox>false</param.checkbox>
     <param.example />
     <param.help.text>Syntax 
-	 cv_gspls_standalone_Dev_2024 -? 
-	 cv_gspls_standalone_Dev_2024 datafile 
+	 cv_mbspls_Dev_2024 -? 
+	 cv_mbspls_Dev_2024 datafile 
  Input Arguments 
 	 -?  print help on how to use the application 
 	 datafile  input arguments</param.help.text>
@@ -92,16 +92,74 @@ ${LD_LIBRARY_PATH}:MR/v912/runtime/glnxa64:MR/v912/bin/glnxa64:MR/v912/sys/os/gl
       <param.example />
     </unset>
     <fileset.main>
-      <file>${PROJECT_ROOT}/scripts/SPLS_Toolbox/cv_gspls_standalone_Dev_2024.m</file>
+      <file>${PROJECT_ROOT}/scripts/SPLS_Toolbox/cv_mbspls_Dev_2024.m</file>
     </fileset.main>
     <fileset.resources />
     <fileset.package />
-    <fileset.depfun />
+    <fileset.depfun>
+      <file>/opt/NM/NeuroMiner_Current/nk_CVpartition.m</file>
+      <file>/opt/NM/NeuroMiner_Current/nk_EqualizeHisto.m</file>
+      <file>/opt/NM/NeuroMiner_Current/nk_PermInd.m</file>
+      <file>/opt/NM/NeuroMiner_Current/preproc/RemoveDisparateImpact.m</file>
+      <file>/opt/NM/NeuroMiner_Current/preproc/SparsePLS/proj_def.m</file>
+      <file>/opt/NM/NeuroMiner_Current/preproc/combat/aprior.m</file>
+      <file>/opt/NM/NeuroMiner_Current/preproc/combat/bprior.m</file>
+      <file>/opt/NM/NeuroMiner_Current/preproc/combat/combat.m</file>
+      <file>/opt/NM/NeuroMiner_Current/preproc/combat/itSol.m</file>
+      <file>/opt/NM/NeuroMiner_Current/preproc/combat/postmean.m</file>
+      <file>/opt/NM/NeuroMiner_Current/preproc/combat/postvar.m</file>
+      <file>/opt/NM/NeuroMiner_Current/preproc/nk_PartialCorrelationsObj.m</file>
+      <file>/opt/NM/NeuroMiner_Current/preproc/nmfv1_4/iszero.m</file>
+      <file>/opt/NM/NeuroMiner_Current/util/allcomb.m</file>
+      <file>/opt/NM/NeuroMiner_Current/util/wmean.m</file>
+      <file>${PROJECT_ROOT}/scripts/SPLS_Toolbox/Hyperparameter_optimization/cv_RandomizedSearch_GetHyperparamComb.m</file>
+      <file>${PROJECT_ROOT}/scripts/SPLS_Toolbox/SLURM/cv_ICV_main_csv_mult_slurm.m</file>
+      <file>${PROJECT_ROOT}/scripts/SPLS_Toolbox/SLURM/cv_ICV_slurm_job_mult.m</file>
+      <file>${PROJECT_ROOT}/scripts/SPLS_Toolbox/cv_ICV_bash_job_mult.m</file>
+      <file>${PROJECT_ROOT}/scripts/SPLS_Toolbox/cv_ICV_bootstrap_csv.m</file>
+      <file>${PROJECT_ROOT}/scripts/SPLS_Toolbox/cv_ICV_hyperopt_csv.m</file>
+      <file>${PROJECT_ROOT}/scripts/SPLS_Toolbox/cv_ICV_main_csv_mult.m</file>
+      <file>${PROJECT_ROOT}/scripts/SPLS_Toolbox/cv_ICV_main_csv_mult_sequential.m</file>
+      <file>${PROJECT_ROOT}/scripts/SPLS_Toolbox/cv_ICV_permutation_csv.m</file>
+      <file>${PROJECT_ROOT}/scripts/SPLS_Toolbox/cv_gspls.m</file>
+      <file>${PROJECT_ROOT}/scripts/SPLS_Toolbox/cv_gspls_full.m</file>
+      <file>${PROJECT_ROOT}/scripts/SPLS_Toolbox/cv_gspls_slim.m</file>
+      <file>${PROJECT_ROOT}/scripts/SPLS_Toolbox/cv_master_correctscale.m</file>
+      <file>${PROJECT_ROOT}/scripts/SPLS_Toolbox/cv_projection.m</file>
+      <file>${PROJECT_ROOT}/scripts/SPLS_Toolbox/cv_setup_parameters.m</file>
+      <file>${PROJECT_ROOT}/scripts/SPLS_Toolbox/cv_weights_ext.m</file>
+      <file>${PROJECT_ROOT}/scripts/SPLS_Toolbox/dp_HOpartition.m</file>
+      <file>${PROJECT_ROOT}/scripts/SPLS_Toolbox/dp_ICV_bash_job_mult.m</file>
+      <file>${PROJECT_ROOT}/scripts/SPLS_Toolbox/dp_ICV_bootstrap_csv.m</file>
+      <file>${PROJECT_ROOT}/scripts/SPLS_Toolbox/dp_ICV_hyperopt_csv.m</file>
+      <file>${PROJECT_ROOT}/scripts/SPLS_Toolbox/dp_ICV_main_csv_mult.m</file>
+      <file>${PROJECT_ROOT}/scripts/SPLS_Toolbox/dp_ICV_permutation_csv.m</file>
+      <file>${PROJECT_ROOT}/scripts/SPLS_Toolbox/dp_ICV_slurm_job_mult.m</file>
+      <file>${PROJECT_ROOT}/scripts/SPLS_Toolbox/dp_LSOVpartition.m</file>
+      <file>${PROJECT_ROOT}/scripts/SPLS_Toolbox/dp_auc_testing.m</file>
+      <file>${PROJECT_ROOT}/scripts/SPLS_Toolbox/dp_corrections.m</file>
+      <file>${PROJECT_ROOT}/scripts/SPLS_Toolbox/dp_correctscale.m</file>
+      <file>${PROJECT_ROOT}/scripts/SPLS_Toolbox/dp_create_folders.m</file>
+      <file>${PROJECT_ROOT}/scripts/SPLS_Toolbox/dp_cu_cv_ext.m</file>
+      <file>${PROJECT_ROOT}/scripts/SPLS_Toolbox/dp_master_correctscale.m</file>
+      <file>${PROJECT_ROOT}/scripts/SPLS_Toolbox/dp_multiple_testing.m</file>
+      <file>${PROJECT_ROOT}/scripts/SPLS_Toolbox/dp_projection.m</file>
+      <file>${PROJECT_ROOT}/scripts/SPLS_Toolbox/dp_projection_ext.m</file>
+      <file>${PROJECT_ROOT}/scripts/SPLS_Toolbox/dp_setup_framework.m</file>
+      <file>${PROJECT_ROOT}/scripts/SPLS_Toolbox/dp_spls.m</file>
+      <file>${PROJECT_ROOT}/scripts/SPLS_Toolbox/dp_spls_full.m</file>
+      <file>${PROJECT_ROOT}/scripts/SPLS_Toolbox/dp_spls_slim.m</file>
+      <file>${PROJECT_ROOT}/scripts/SPLS_Toolbox/dp_standardize.m</file>
+      <file>${PROJECT_ROOT}/scripts/SPLS_Toolbox/dp_standardize_comb.m</file>
+      <file>${PROJECT_ROOT}/scripts/SPLS_Toolbox/dp_trainmerge_single.m</file>
+      <file>${PROJECT_ROOT}/scripts/SPLS_Toolbox/fdr_BH.m</file>
+      <file>${PROJECT_ROOT}/scripts/SPLS_Toolbox/proj_def_single.m</file>
+    </fileset.depfun>
     <build-deliverables>
+      <file location="${PROJECT_ROOT}/cv_gspls_standalone_Dev_2024/for_testing" name="run_cv_mbspls_Dev_2024.sh" optional="false">/volume/projects/CV_gs_PLS/ScrFun/multiblock_spls/cv_gspls_standalone_Dev_2024/for_testing/run_cv_mbspls_Dev_2024.sh</file>
       <file location="${PROJECT_ROOT}/cv_gspls_standalone_Dev_2024/for_testing" name="readme.txt" optional="true">/volume/projects/CV_gs_PLS/ScrFun/multiblock_spls/cv_gspls_standalone_Dev_2024/for_testing/readme.txt</file>
-      <file location="${PROJECT_ROOT}/cv_gspls_standalone_Dev_2024/for_testing" name="run_cv_gspls_standalone_Dev_2024.sh" optional="false">/volume/projects/CV_gs_PLS/ScrFun/multiblock_spls/cv_gspls_standalone_Dev_2024/for_testing/run_cv_gspls_standalone_Dev_2024.sh</file>
+      <file location="${PROJECT_ROOT}/cv_gspls_standalone_Dev_2024/for_testing" name="cv_mbspls_Dev_2024" optional="false">/volume/projects/CV_gs_PLS/ScrFun/multiblock_spls/cv_gspls_standalone_Dev_2024/for_testing/cv_mbspls_Dev_2024</file>
       <file location="${PROJECT_ROOT}/cv_gspls_standalone_Dev_2024/for_testing" name="splash.png" optional="false">/volume/projects/CV_gs_PLS/ScrFun/multiblock_spls/cv_gspls_standalone_Dev_2024/for_testing/splash.png</file>
-      <file location="${PROJECT_ROOT}/cv_gspls_standalone_Dev_2024/for_testing" name="cv_gspls_standalone_Dev_2024" optional="false">/volume/projects/CV_gs_PLS/ScrFun/multiblock_spls/cv_gspls_standalone_Dev_2024/for_testing/cv_gspls_standalone_Dev_2024</file>
     </build-deliverables>
     <workflow />
     <matlab>

@@ -1,0 +1,62 @@
+%% testing for correlations between GM volume and clinical pattern
+
+results_file = '/volume/HCStress/Analysis/27-Mar-2019/DP_CTQ_allgroups_649_GM_80PI_12GO_110X060_40GD_110Y010_40GD_correct10_10_XY_SC_3_Diag/final_results/result.mat';
+
+load(results_file);
+
+variables = {'male', 'female'};
+number_brain_regions = 1;
+colorpattern_LS = hsv(number_brain_regions);
+
+% first_line = strrep([input.name, ' grid_density_x=' num2str(input.grid_x.density), ' grid_density_x=' num2str(input.grid_x.density), ' grid_density_y=' num2str(input.grid_y.density), ', LV ',num2str(i)], '_', ' ');
+% second_line = strrep([input.selected_studygroups{1,ii}, ', epsilon x ', fields{iii}, ', p-value = ' num2str(p_value), ', Spearman''s RHO = ', num2str(RHO_value)], '_', ' ');
+% if output.final_parameters{i,opt_p}<=output.pvalue_FDR(i)
+%     third_line1 = 'LV significant';
+% else
+%     third_line1 = 'LV not significant';
+% end
+
+% marker_size = 10;
+% font_size = 26;
+% axis([0 3 0 1]);
+nn=1;
+for i=1:number_brain_regions
+    for ii=1:2
+        subplot(1,2,nn);
+        GM_data_all = output.volumes.brainnetome.raw{4,ii}(:,i);
+        GM_data_male = GM_data_all(input.behavior(:,strcmp(input.behavior_names, 'male'))>0);
+        GM_data_female = GM_data_all(input.behavior(:,strcmp(input.behavior_names, 'female'))>0);
+        boxplot([GM_data_all;GM_data_all], [ones(size(GM_data_all,1),1); (input.behavior(:,strcmp(input.behavior_names, 'male'))+2)]);
+        title(output.volumes.brainnetome.names{4,ii}{2,i});
+        xticklabels({'all', 'female', 'male'});
+        ylabel('GM volume');
+        set(gcf,'Position', get(0,'Screensize'));
+        set(gcf,'PaperPositionMode','auto')
+        nn=nn+1;
+    end
+end
+
+
+nn=1;
+for i=1:number_brain_regions
+    for ii=1:2
+        subplot(1,2,nn);
+        GM_data_all = output.volumes.brainnetome.raw{1,ii}(:,i);
+        age_data_all = input.behavior(:, strcmp(input.behavior_names, 'Age'));
+        scatter(age_data_all, GM_data_all);
+        title(output.volumes.brainnetome.names{1,ii}{2,i});
+        xlabel('Age');
+        ylabel('GM volume');
+        set(gcf,'Position', get(0,'Screensize'));
+        set(gcf,'PaperPositionMode','auto')
+        nn=nn+1;
+    end
+end
+
+
+
+
+
+
+
+

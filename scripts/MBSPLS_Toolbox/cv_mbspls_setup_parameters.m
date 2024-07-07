@@ -1,0 +1,354 @@
+%% DP function to set up parameters
+
+function [input, setup, matrices, B, K, W, OB, IB, size_sets_permutation, size_sets_bootstrap, correlation_method, cs_method, selection_train, selection_retrain, correction_target, matrix_norm, search_params, mbspls_params] = cv_mbspls_setup_parameters(input, setup)
+
+% TO DO: check if paths are specified instead of matrices, cell fun
+if isfield(input, 'X') && ~isempty(input.X)
+    try temp = load(input.X);
+        % CV: what does this do?
+        field = fieldnames(temp);
+        X = temp.(field{1});
+        clear('temp');
+    catch
+        X = input.X;
+    end
+    if isfield(input, 'Y')
+        try temp = load(input.Y);
+            field = fieldnames(temp);
+            Y = temp.(field{1});
+            clear('temp');
+        catch
+            Y = input.Y;
+        end
+    end
+    matrices = [];
+else
+    if isfield(input, 'matrices')
+        matrices = cellfun(@load_matrices,input.matrices, UniformOutput=false);
+        X = [];
+        Y = [];
+    end
+
+
+end
+
+
+if ~isfield(input, 'correct_limit')
+    input.correct_limit=1;
+end
+
+if ~isfield(setup, 'max_sim_jobs')
+    setup.max_sim_jobs = 40;
+end
+
+if ~isfield(input, 'permutation_testing')
+    input.permutation_testing = 5000;
+end
+B = input.permutation_testing;
+
+if ~isfield(input, 'bootstrap_testing')
+    input.bootstrap_testing = 500;
+end
+
+if ~isfield(input, 'optimization_strategy')
+    input.optimization_strategy = 'grid_search';
+end
+
+switch input.optimization_strategy
+    case 'grid_search'
+        if ~isfield(input, 'grid_static') && ~isfield(input, 'grid_dynamic')
+            input.grid_static = 20;
+        end
+
+        if isfield(input, 'grid_static')
+            input.grid_dynamic.onset    = 1;
+            if isfield(input, 'X')
+                input.grid_dynamic.LV_1.x   = struct('start', 1, 'end', 0, 'density', input.grid_static);
+                input.grid_dynamic.LV_1.y   = struct('start', 1, 'end', 0, 'density', input.grid_static);
+            else
+                if isfield(input, 'matrices') % CV: TO DO - what is static grid?
+                    %input.grid_dynamic.LVs.x   = struct('start', 1, 'end', 0, 'density', input.grid_static);
+                end
+            end
+        end
+
+        search_params = input.grid_dynamic.LVs;
+    case 'randomized_search'
+    if ~isfield(input, 'randomized_search_params')
+
+    if ~isfield(input.randomized_search_params, 'randomized_search_iterations')
+        input.randomized_search_params.randomized_search_iterations = 100; 
+    end
+
+    if ~isfield(input.randomized_search_params, 'seed')
+        input.randomized_search_params.seed = 1234; 
+    end
+
+    if ~isfield(input.randomized_search_params, 'hyperparam_distributions') 
+        for num_m=1:size(input.matrices, 2)
+            input.randomized_search_params.hyperparam_distributions{num_m} = makedist('uniform', 1, sqrt(size(input.matrices{num_m},2))); % CV: check if 1 and sqrt are correct range
+        end
+    else
+        if size(input.randomized_search_params.hyperparam_distributions, 2) ~= size(input.matrices, 2)
+            error('check your input parameters: input.randomized_search_params.hyperparam_distributions');
+        end
+    end
+
+    end
+
+    %random_density_combinations = cv_randomized_search_hyperparam_combinations(input.randomized_search_params.hyperparameter_distributions, input.randomized_search_params.randomized_seach_iterations, input.randomized_search_params.seed);
+    search_params = input.randomized_search_params; 
+end
+
+
+% set number of jobs based on n permutations, n bootstrap, hyperparameter
+% combinations
+try 
+    if isfield(input, 'X') && ~isempty(input.X)
+        grid_size = grid_x.density*grid_y.density;
+    else 
+        switch input.optimization_strategy
+            case 'grid_search'
+                grid = input.grid_dynamic.LVs;
+                grid_size = 1;
+                for num_m=1:size(matrices,2)
+                    grid_size = grid(num_m).density*grid_size;
+                end
+            case 'randomized_search'
+                grid_size = input.randomized_search_params.randomized_search_iterations;
+        end
+    end
+    num_jobs = gcd_of_three(input.permutation_testing, input.bootstrap_testing, grid_size, setup.max_sim_jobs);
+    setup.max_sim_jobs = num_jobs;
+catch
+    error('Define different number for max_sim_jobs to use parallelisation.')
+end
+
+if ~isfield(input, 'CV')
+    if ~isfield(input, 'inner_folds')
+        input.inner_folds = 10;
+    end
+    K = input.inner_folds;
+
+    if ~isfield(input, 'outer_folds')
+        input.outer_folds = 10;
+    end
+    W = input.outer_folds;
+
+    if ~isfield(input, 'outer_permutations')
+        input.outer_permutations = 1;
+    end
+    OB = input.outer_permutations;
+
+    if ~isfield(input, 'inner_permutations')
+        input.inner_permutations = 1;
+    end
+    IB = input.inner_permutations;
+else 
+    % check if CV structure and input for inner_folds, outer_folds,
+    % inner_permutations and outer_permutations are compatible; or actually
+    % overwrite these fields with input from CV; check whether CV structure
+    % fits length of the data (check NM/ with Nikos) 
+
+    % check if n observations is the same 
+    n_obs_cv = size(input.CV.cv_outer_test_labels{1,1},1) + size(input.CV.cv_outer_train_labels{1,1},1);
+    if n_obs_cv ~= size(input.Diag, 1)
+        if ~isfield(input, 'inner_folds')
+            input.inner_folds = 10;
+        end
+        K = input.inner_folds;
+
+        if ~isfield(input, 'outer_folds')
+            input.outer_folds = 10;
+        end
+        W = input.outer_folds;
+
+        if ~isfield(input, 'outer_permutations')
+            input.outer_permutations = 1;
+        end
+        OB = input.outer_permutations;
+
+        if ~isfield(input, 'inner_permutations')
+            input.inner_permutations = 1;
+        end
+        IB = input.inner_permutations;
+        input = rmfield(input, 'CV');
+    else
+        % check if stratification matches (TO DO) 
+        input.inner_folds = size(input.CV.cv_inner_indices{1,1}.TrainInd,2);
+        input.outer_folds = size(input.CV.cv_outer_indices.TrainInd,2);
+        input.inner_permutations = size(input.CV.cv_inner_indices{1,1}.TrainInd,1);
+        input.outer_permutations = size(input.CV.cv_outer_indices.TrainInd,1);
+        K = input.inner_folds;
+        W = input.outer_folds;
+        IB = input.inner_permutations;
+        OB = input.outer_permutations;
+    end
+
+end
+
+if ~isfield(input, 'save_CV')
+    input.save_CV = 0; 
+end
+
+if ~isfield(input, 'validation_train')
+    input.validation_train = 1;
+end
+
+if ~isfield(input, 'size_sets_permutation')
+    input.size_sets_permutation = round(input.permutation_testing/setup.max_sim_jobs);
+end
+size_sets_permutation = input.size_sets_permutation;
+
+if ~isfield(input, 'permutation_testing_precision')
+    input.permutation_testing_precision = 'lenient';
+end
+
+if ~isfield(input, 'size_sets_bootstrap')
+    input.size_sets_bootstrap = round(input.bootstrap_testing/setup.max_sim_jobs);
+end
+size_sets_bootstrap = input.size_sets_bootstrap;
+
+if ~isfield(input, 'statistical_testing')
+    input.statistical_testing = 1;
+end
+
+if ~isfield(input, 'mbspls_params')
+    input.mbspls_params = [];
+end
+
+
+if ~isfield(input.mbspls_params, 'e')
+    input.mbspls_params.e = 1e-5;
+end
+if ~isfield(input.mbspls_params, 'itr_lim')
+    input.mbspls_params.itr_lim = 1000;
+end
+if ~isfield(input.mbspls_params, 'gs')
+    n_Xs = size(input.Xs,2);
+    input.mbspls_params.gs = (1/(n_Xs-1)) * (ones(n_Xs) - eye(n_Xs));
+end
+
+input.mbspls_params.printflag = -1; 
+mbspls_params = input.mbspls_params; 
+
+if ~isfield(input, 'correlation_method')
+    input.correlation_method = 'Spearman';
+end
+correlation_method = input.correlation_method;
+
+if ~isfield(input, 'matrix_norm')
+    if size(matrices,2) > 2
+        input.matrix_norm = 2; 
+    else
+        input.matrix_norm = 0; 
+    end
+end
+matrix_norm = input.matrix_norm; 
+
+if ~isfield(input, 'cs_method') % actually this should only be necessary if correction is activated for at least one matrix, consider changing (I think bootstrap funciton would need to be adjusted then as well) 
+    cs_method.method = 'mean-centering';
+    cs_method.correction_subgroup = '';
+    for i=1:size(matrices,2) % add same settings for each matrix 
+        input.cs_method{1,i} = cs_method;
+    end
+
+end
+
+cs_method = input.cs_method; 
+
+
+if size(input.cs_method,2) < size(matrices,2)
+    for i=1:size(input.cs_method,2)
+        cs_method_temp{i} = input.cs_method{i};
+
+    end
+    for i=(size(input.cs_method,2)+1):size(matrices,2) % add same settings for each matrix 
+        cs_method_temp{i} = input.cs_method{1};
+        %cs_method_temp{i}.correction_subgroup = '';
+    end
+    input.cs_method = cs_method_temp;
+end
+cs_method = input.cs_method;
+
+if ~isfield(input, 'selection_train')
+    input.selection_train = 1;
+end
+selection_train = input.selection_train;
+
+if ~isfield(input, 'selection_retrain')
+    input.selection_retrain = 1;
+end
+selection_retrain = input.selection_retrain;
+
+if ~isfield(input, 'type_correction') 
+    for i=1:size(matrices, 2)
+        input.type_correction{i} = 'correct'; % should this really be the default? what if no covars specified, uncorrected would be a better default in my eyes
+    end
+end
+
+if ~isfield(input, 'merge_train')
+    input.merge_train = 'median';
+end
+
+if ~isfield(input, 'merge_retrain')
+    input.merge_retrain = 'median';
+end
+
+if ~isfield(input, 'correct_limit')
+    input.correct_limit = 1;
+end
+
+if ~isfield(input, 'final_merge')
+    input.final_merge.type = 'best';
+end
+
+if ~isfield(input, 'correction_target')
+    for i=1:size(matrices,2)
+        input.correction_target(i) = 1; % would 0 not be a better default? (dont correct); correction_target makes type_correction arbitrary...
+    end
+end
+correction_target = input.correction_target;
+
+if ~isfield(input, 'coun_ts_limit')
+    input.coun_ts_limit = 1;
+end
+
+if ~isfield(input, 'max_n_LVs')
+    input.max_n_LVs = -1; % -1 = no maximum: then, it depends on not significant LVs limit (coun_ts_limit)
+end
+
+if ~isfield(input, 'alpha_value')
+    input.alpha_value = 0.05;
+end
+
+if ~isfield(input, 'additional_NCV') % CV: what is this? 
+    input.additional_NCV = false;
+end
+
+end
+
+
+function matrix = load_matrices(matrix)
+try temp = load(matrix);
+    field = fieldnames(temp);
+    matrix = temp.(field{1});
+    clear('temp');
+catch
+    matrix = matrix;
+end
+end
+
+
+function result = gcd_of_three(a, b, c, threshold)
+    min_value = min([a, b, c]);
+    result = min_value;
+    for i = threshold:-1:1
+        if mod(a, i) == 0 && mod(b, i) == 0 && mod(c, i) == 0
+            result = i;
+            break;  % Exit loop once we find the GCD
+        end
+    end
+end
+
+
