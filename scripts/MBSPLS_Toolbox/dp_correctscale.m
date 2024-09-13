@@ -13,7 +13,7 @@ else
 end
 
 if isnumeric(DAT) % only operate on one dataset
-    if ~any(isnan(COV))
+    if ~all(isnan(COV))
         if any(sum(COV,1)==0) || any(range(COV)==0)
             log_remove = sum(COV,1)==0;
             COV(:,log_remove) = [];

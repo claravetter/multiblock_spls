@@ -22,7 +22,9 @@ labels = m_data.train_DiagNames;
 cs_method_bootstrap = m_data.cs_method;
 correction_target = m_setup.correction_target;
 
-[~,bootsam] = bootstrp(m_setup.size_sets_bootstrap,[],1:size(train_data_matrices{1},1));
+%[~,bootsam] = bootstrp(m_setup.size_sets_bootstrap,[],1:size(train_data_matrices{1},1));
+
+bootsam = [bootsam, [1:size(train_data_matrices{1},1)]'];
 
 % perform procrustean transformation to minimize rotation effects of
 % permutated y matrix, if V_opt available
@@ -48,25 +50,43 @@ for ii=1:size(bootsam,2)
 
 
     
-    if ~islogical(m_opt.Vs_opt)
-        [RHO_boot(1,ii), weights_boot(:,ii), ~, ~] = cv_mbspls_full(OUT_matrices, OUT_matrices, c_weights, m_setup.mbspls_params, m_setup.correlation_method, m_setup.matrix_norm, m_opt.Vs_opt);
+    if ~islogical(m_opt.Vs_opt) && m_setup.procrustes_flag
+        [RHO_boot(1,ii), weights_boot(:,ii), ~, ~] = cv_mbspls_wrapper(OUT_matrices, ...
+            OUT_matrices, ...
+            c_weights, ...
+            m_setup.mbspls_params, ...
+            m_setup.correlation_method, ...
+            m_setup.matrix_norm, ...
+            m_opt.Vs_opt); % full
     else
-        [RHO_boot(1,ii), weights_boot(:,ii), ~, ~] = cv_mbspls_full(OUT_matrices, OUT_matrices, c_weights,m_setup.mbspls_params, m_setup.correlation_method, m_setup.matrix_norm);
+        [RHO_boot(1,ii), weights_boot(:,ii), ~, ~] = cv_mbspls_wrapper(OUT_matrices, ...
+            OUT_matrices, ...
+            c_weights, ...
+            m_setup.mbspls_params, ...
+            m_setup.correlation_method, ...
+            m_setup.matrix_norm); % full
     end
 end
 
+%RHO_orig = RHO_boot(1,size(bootsam,2));
+%RHO_boot = RHO_boot(1,1:size(bootsam,2));
 if isnumeric(i)
     writematrix(RHO_boot,[analysis_folder, '/RHO_results_', num2str(i), '.csv'],'Delimiter','tab');
 else
     writematrix(RHO_boot,[analysis_folder, '/RHO_results_', i, '.csv'],'Delimiter','tab');
 end
 
-
+%weights_orig = weights_boot(1,size(bootsam,2));
+%weights_boot = weights_boot(1,1:size(bootsam,2));
 for num_m=1:length(train_data_matrices)
     if isnumeric(i)
         writematrix(cell2mat(weights_boot(num_m,:)), [analysis_folder, '/weights_', num2str(num_m), '_results_', num2str(i), '.csv'],'Delimiter','tab');
+        %writematrix(cell2mat(weights_orig(num_m,:)), [analysis_folder, '/weights_orig_', num2str(num_m), '_results_', num2str(i), '.csv'],'Delimiter','tab');
+        
     else
         writematrix(cell2mat(weights_boot(num_m,:)), [analysis_folder, '/weights_', num2str(num_m), '_results_', i, '.csv'],'Delimiter','tab');
+        %writematrix(cell2mat(weights_orig(num_m,:)), [analysis_folder, '/weights_orig_', num2str(num_m), '_results_', num2str(i), '.csv'],'Delimiter','tab');
+        
     end
 end
 

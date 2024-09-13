@@ -86,7 +86,11 @@ switch input.optimization_strategy
 
     if ~isfield(input.randomized_search_params, 'hyperparam_distributions') 
         for num_m=1:size(input.matrices, 2)
-            input.randomized_search_params.hyperparam_distributions{num_m} = makedist('uniform', 1, sqrt(size(input.matrices{num_m},2))); % CV: check if 1 and sqrt are correct range
+            if size(input.matrices{num_m},2) > 1
+                input.randomized_search_params.hyperparam_distributions{num_m} = makedist('uniform', 1, sqrt(size(input.matrices{num_m},2))); % CV: check if 1 and sqrt are correct range
+            else
+                input.randomized_search_params.hyperparam_distributions{num_m} = 1;
+            end
         end
     else
         if size(input.randomized_search_params.hyperparam_distributions, 2) ~= size(input.matrices, 2)

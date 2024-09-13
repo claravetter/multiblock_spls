@@ -31,13 +31,23 @@ end
 
 cs_method_permutation = m_data.cs_method;
 
-for num_m=1:length(IN_matrices.train)-1
+% permut all but last matrix
+% for num_m=1:length(IN_matrices.train)-1
+%     for pp=1:str2double(i)
+%         permmat = nk_PermInd(m_setup.size_sets_permutation, m_data.train_Diag); % CV: nk_PermInd if NeuroMiner_1.3
+%     end
+%     permmats{num_m} = permmat; 
+% end
+
+% permute all matrices
+for num_m=1:length(IN_matrices.train)
     for pp=1:str2double(i)
-        permmat = nk_PermInd(m_setup.size_sets_permutation, m_data.train_Diag); % C: nk_PermInd if NeuroMiner_Current; nk_PermInd if NeuroMiner_1.2 / _1.1
+        permmat = nk_PermInd(m_setup.size_sets_permutation, m_data.train_Diag); 
     end
     permmats{num_m} = permmat; 
 end
 clear permmat
+
 RHO_collection_ICV = nan(m_setup.size_sets_permutation,1);
 
 for ii=1:m_setup.size_sets_permutation
@@ -50,10 +60,22 @@ for ii=1:m_setup.size_sets_permutation
 
     [OUT_matrices] = cv_master_correctscale(IN_matrices, COV, cs_method_permutation, m_setup.correction_target);
     
-    if ~islogical(m_opt.Vs_opt)
-        RHO_collection_ICV(ii,1) = cv_mbspls_slim(OUT_matrices.train, OUT_matrices.test, m_opt.c_weights_opt, m_setup.mbspls_params, m_setup.correlation_method, m_opt.Vs_opt, m_setup.matrix_norm);
+    if ~islogical(m_opt.Vs_opt) && m_setup.procrustes_flag
+        RHO_collection_ICV(ii,1) = cv_mbspls_wrapper(OUT_matrices.train, ...
+            OUT_matrices.test, ...
+            m_opt.c_weights_opt, ...
+            m_setup.mbspls_params, ...
+            m_setup.correlation_method, ...
+            m_setup.matrix_norm, ...
+            m_opt.Vs_opt); % slim
     else
-        RHO_collection_ICV(ii,1) = cv_mbspls_slim(OUT_matrices.train, OUT_matrices.test, m_opt.c_weights_opt, m_setup.mbspls_params, m_setup.correlation_method, [], m_setup.matrix_norm);
+        RHO_collection_ICV(ii,1) = cv_mbspls_wrapper(OUT_matrices.train, ...
+            OUT_matrices.test, ...
+            m_opt.c_weights_opt, ...
+            m_setup.mbspls_params, ...
+            m_setup.correlation_method, ...
+            m_setup.matrix_norm, ...
+            []); % slim
     end
 end
 

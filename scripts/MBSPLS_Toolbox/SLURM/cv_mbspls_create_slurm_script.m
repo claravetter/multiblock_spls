@@ -2,7 +2,7 @@ function slurm_script = cv_mbspls_create_slurm_script(input, setup, custom_path)
 
 ld_library_path = [setup.matlab_path, '/runtime/glnxa64:', ...
     setup.matlab_path, '/bin/glnxa64:', ...
-    setup.matlab_path, '/sys/os/glnxa64', ...
+    setup.matlab_path, '/sys/os/glnxa64:', ...
     setup.matlab_path, '/extern/bin/glnxa64'];
 
 slurm_script_name = ['SLURM_job_mbspls', input.name, '.sh'];
@@ -27,6 +27,12 @@ fprintf(FID,['#!/bin/sh \n',...
 
 fclose(FID);
 slurm_script = [custom_path, '/SLURM_job_mbspls',input.name, '.sh'];
+
+disp(['mkdir ', setup.analysis_folder])
+
+disp(['scp -r ', setup.analysis_folder_hpc, ' ', setup.user, '@srvcorem2:', fileparts(setup.analysis_folder)])
+
+disp(['Or copy files individually:'])
 disp(['scp -r ', slurm_script, ' ', setup.user, '@srvcorem2:', setup.analysis_folder])
 disp(['scp -r ', input.datafile , ' ', setup.user, '@srvcorem2:', setup.analysis_folder])
 disp(['To start job, run:'])

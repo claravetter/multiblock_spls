@@ -73,8 +73,15 @@ for i = 1:num_matrices
 
             %--- Perform Procrustes Rotation if permutation flag is set
             % Vs{i,j} = nk_Procrustes(Vs_original{i,j},Vs_resampled{i,j});
-            [~,Vs{i,j}] = procrustes(Vs_original{i,j},Vs_resampled{i,j});
+            
+            %C_temp = Vs_original{i,j}' * Vs_resampled{i,j};
+            %[N,~,P] = svd(C_temp,0);
+            %Q = N*P';
+            %Vs{i,j} = Vs_resampled{i,j} * S * Q;
 
+
+            [~,Vs{i,j}] = procrustes(Vs_original{i,j},Vs_resampled{i,j});%,'Scaling', false, 'Reflection', false);
+            %Vs{i,j} = Vs{i,j} * S;
         else
             %--- compute SVD
             [~, ~, Vs{i, j}] = svd(covariances{i, j},0);

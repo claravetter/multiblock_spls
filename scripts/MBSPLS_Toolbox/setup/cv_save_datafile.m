@@ -30,6 +30,9 @@ switch input.optimization_strategy
         input.name = [name_part1, '_', input.optimization_strategy, '_', density_str, '_densities'];
 end
 
+if isfield(input, 'procrustes_flag') && ~input.procrustes_flag
+    input.name = [input.name, '_ProcrustesRotation'];
+end
 input.datafile = fullfile(analysis_folder, [setup.date, '_', input.name, '_datafile.mat']); % Path for storing datafile containing input and setup
 
 mkdir(analysis_folder); % Creates analysis folder

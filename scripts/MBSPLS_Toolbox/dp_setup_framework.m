@@ -4,12 +4,12 @@ function CV = dp_setup_framework(IN)
 
 switch IN.type % 1 = nested cross-validation, 2 = random hold-out splits, 3 = LSOV, 4 = random split-half
     case 1
-        try
+        %try
             CV.cv_outer_indices = struct;
             CV.cv_outer_indices = nk_CVpartition(IN.OB, IN.OF, IN.labels);
-        catch
-            disp(['Not enough subjects for nested cross-validation with ', num2str(IN.OF), ' outer folds']);
-        end
+        %catch
+        %    disp(['Not enough subjects for nested cross-validation with ', num2str(IN.OF), ' outer folds']);
+       % end
         for ob=1:IN.OB
             for w=1:IN.OF
                 CV.cv_outer_test_labels{ob,w} = IN.labels(CV.cv_outer_indices.TestInd{ob,w},:);

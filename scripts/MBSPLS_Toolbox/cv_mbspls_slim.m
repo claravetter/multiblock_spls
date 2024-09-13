@@ -8,7 +8,7 @@ e = mbspls_params.e;% 1e-5;
 itr_lim = mbspls_params.itr_lim;% 1000;
 printflag = mbspls_params.printflag;%0; 
 %perform SPLS on the training data using the current cu/cv combination
-if exist('Vs_original', 'var') && ~isempty(Vs_original)
+if exist('Vs_original', 'var') && ~isempty(Vs_original) % is this ever possible?
     [weights, ~, ~, ~, ~, ~, ~] = cv_mbspls(training_data, cs, gs, e, itr_lim, printflag, Vs_original);
             
 else
