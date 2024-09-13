@@ -1,0 +1,235 @@
+%% DP general script for visualizing vectors and latent scores
+
+function dp_vis_general(analysis_folder, results_path, selection_vectors, plot_all, additional_plotting, to_plot_collection, val_log)
+
+% dp_vis_general(b_folder, IN.results_path, {'v'}, IN.plot_all, false, {'abstinence_aktuell', 'abstinence_always'}, input.validation_set)
+
+load(results_path);
+
+% switch overall_analysis
+%     case 'Stress'
+%         overall_folder = '/volume/HCStress/Analysis/Stress';
+%     case 'Resilience'
+%         overall_folder = '/volume/HCStress/Analysis/Resilience';
+%     case 'Schizotypy'
+%         overall_folder = '/volume/MU_Pronia_PLS_Schizotypy/Analysis/SPLS/Schizotypy';
+%     case 'Alcohol'
+%         overall_folder = '/volume/DP_Alcohol_FR/Analysis/Alcohol';
+%     case 'SCZ_EEG'
+%         overall_folder = '/volume/DP_FEF/Analysis/SCZ_EEG';
+%     case 'Mimics'
+%         overall_folder = '/volume/HCStress/Analysis/Mimics';
+% end
+%
+% folder_name = [setup.date, '_', input.name];
+%
+% collection_folder = [overall_folder, '/', folder_name];
+%
+% mkdir(collection_folder);
+
+% b_folder = [collection_folder, '/behavior'];
+% mkdir(b_folder);
+
+index_u = strcmp(output.parameters_names, 'u');
+index_v = strcmp(output.parameters_names, 'v');
+index_epsilon = strcmp(output.parameters_names, 'epsilon');
+index_omega = strcmp(output.parameters_names, 'omega');
+index_p = strcmp(output.parameters_names, 'p');
+index_RHO = strcmp(output.parameters_names, 'RHO');
+
+try params_available = {index_u, index_v; input.X_names, input.Y_names; index_epsilon, index_omega; 'u', 'v'};
+catch input.X_names = {};input.Y_names = {};
+    params_available = {index_u, index_v; input.X_names, input.Y_names; index_epsilon, index_omega; 'u', 'v'};
+end
+params_coll = params_available(:, ismember(params_available(4,:), selection_vectors));
+
+switch val_log
+    case true
+        results_coll = {'final_parameters', 'validation_results'};
+    case false
+        results_coll = {'final_parameters'};
+end
+
+nn=true;
+for o=1:size(results_coll,2)
+    
+    %     try temp_parameters = output.(results_coll{o});
+    %     catch ME
+    %         disp(ME.message);
+    %         nn=false;
+    %     end
+    
+    temp_parameters = output.(results_coll{o});
+    
+    if nn
+        for i=1:size(temp_parameters,1)
+            for t=1:size(params_coll,2)
+                whole_vector = temp_parameters{i,params_coll{1,t}};
+%                 if plot_all % plot all features
+%                     temp_vector = temp_parameters{i,params_coll{1,t}};
+%                     whole_vector = temp_vector;
+%                     temp_legend = params_coll{2,t};
+%                 else % plot only non-zero features
+%                     whole_vector = temp_parameters{i,params_coll{1,t}};
+%                     log_temp = whole_vector~=0;
+%                     temp_vector = temp_parameters{i,params_coll{1,t}}(log_temp);
+%                     temp_legend = params_coll{2,t}(log_temp);
+%                 end
+                
+                if plot_all % plot all features
+                    log_temp = ones(size(whole_vector))==1;
+                    temp_vector = temp_parameters{i,params_coll{1,t}};
+                else % plot only non-zero features
+                    log_temp = whole_vector~=0;
+                end
+                
+                temp_vector = temp_parameters{i,params_coll{1,t}}(log_temp);
+                temp_legend = params_coll{2,t}(log_temp);
+                
+                subplot(2,1,t);
+                colors_vector = turbo(size(whole_vector,1));
+                colors_temp_vector = colors_vector(log_temp,:);
+                
+                for ii=1:size(temp_vector,1)
+                    bar(ii, temp_vector(ii), 'FaceColor', colors_temp_vector(ii,:))
+                    hold all
+                end
+                
+                if size(temp_vector,1)<= 25
+                    numcolumns = 1;
+                elseif size(temp_vector,1)<= 50
+                    numcolumns = 2;
+                elseif size(temp_vector,1) <= 75
+                    numcolumns = 3;
+                elseif size(temp_vector,1) <= 100
+                    numcolumns = 4;
+                else
+                    numcolumns = 5;
+                end
+
+                legend(strrep(temp_legend, '_', ' '), 'Location', 'bestoutside', 'NumColumns',numcolumns);
+                ylabel('weights');
+                hold all
+                
+            end
+            
+            if any(i==input.grid_dynamic.onset)
+                grid_x = input.grid_dynamic.(['LV_', num2str(i)]).x;
+                grid_y = input.grid_dynamic.(['LV_', num2str(i)]).y;
+            end
+            
+            first_line = strrep([input.name, ' grid_density_x=' num2str(grid_x.density), ', grid_density_y=' num2str(grid_y.density), ', LV ',num2str(i)], '_', ' ');
+            second_line = ['p-value (FDR-corrected) = ' num2str(temp_parameters{i,index_p}), ', Spearman''s RHO = ', num2str(temp_parameters{i,index_RHO})];
+            
+            if i < size(temp_parameters,1)
+                third_line = 'significant';
+            else
+                third_line = 'not significant';
+            end
+            
+            fourth_line = strrep(results_coll{o}, '_', ' ');
+            subtitle({first_line; second_line; third_line; fourth_line}); % add third line
+            %             title({first_line; second_line; third_line; fourth_line}); % add third line
+            
+            hold all
+            
+            set(gcf,'Position', get(0,'Screensize'));
+            set(gcf,'PaperPositionMode','auto');
+            
+            print(gcf, [analysis_folder, '/', results_coll{o}, '_', input.name, '_LV_' num2str(i)], '-dpng', '-r0');
+            saveas(gcf, [analysis_folder, '/', results_coll{o}, '_', input.name, '_LV_' num2str(i), '.fig']);
+            saveas(gcf,[analysis_folder, '/', results_coll{o}, '_', input.name, '_LV_' num2str(i)],'epsc');
+            
+            close(gcf);
+            
+        end
+    end
+    
+    if additional_plotting
+        
+        %load('/volume/DP_Alcohol_FR/Data/fulldata_SPLS.mat');
+        
+        % compute epsilon and omega all by projecting u and v onto X and Y
+        try temp = load(input.X);
+            temp_names = fieldnames(temp);
+            X = temp.(temp_names{1});
+        catch
+            X = input.X;
+        end
+        
+        Y = input.Y;
+        
+        RHO=[]; epsilon_all={}; omega_all={};
+        input.covariates = nan(size(input.X,1),1);
+        
+        for i=1:size(output.final_parameters,1)
+            
+            if ~input.corrected_log(i)
+                Covars = nan(size(input.covariates,1),1);
+                correction_target = 3;
+            else
+                Covars = input.covariates;
+            end
+            
+            [OUT_x, OUT_y] = dp_master_correctscale(X, Y, Covars, input.scaling_method, input.correction_target);
+            
+            u = output.final_parameters{i, strcmp(output.parameters_names, 'u')};
+            v = output.final_parameters{i, strcmp(output.parameters_names, 'v')};
+            
+            [RHO(i,1), epsilon_all{i,1}, omega_all{i,1}, ~, ~] = dp_projection(OUT_x, OUT_y, u, v, input.correlation_method);
+            
+            mdl = fitlm(epsilon_all{i,1}, omega_all{i,1});
+            output.measures.linear_models{i} = mdl;
+            output.measures.Rsquared_Ordinary(i) = mdl.Rsquared;
+            
+            [X, Y] = proj_def(X, Y, u, v);
+            
+        end
+        
+        output.final_parameters = [output.final_parameters, epsilon_all, omega_all];
+        output.parameters_names = [output.parameters_names, 'epsilon_all', 'omega_all'];
+        
+        for pp=1:size(to_plot_collection,2)
+            
+            abstinence_log = Y_table.(to_plot_collection{pp}) ==1;
+            no_abstinence_log = ~abstinence_log;
+            
+            for i=1:size(output.final_parameters,1)
+                f=figure();
+                plot(epsilon_all{i}(abstinence_log), omega_all{i}(abstinence_log),'.', 'MarkerSize', 14, 'color', 'blue', 'DisplayName', 'abstinence');
+                hold on
+                plot(epsilon_all{i}(no_abstinence_log), omega_all{i}(no_abstinence_log),'.', 'MarkerSize', 14, 'color', 'red', 'DisplayName', 'no abstinence');
+                hold on
+                lsline
+                
+                first_line = strrep([input.name, ' grid_density_x=' num2str(grid_x.density), ', grid_density_y=' num2str(grid_y.density), ', LV ',num2str(i)], '_', ' ');
+                second_line = ['p-value (FDR-corrected) = ' num2str(temp_parameters{i,index_p}), ', Spearman''s RHO = ', num2str(temp_parameters{i,index_RHO})];
+                
+                if i < size(temp_parameters,1)
+                    third_line = 'significant';
+                else
+                    third_line = 'not significant';
+                end
+                
+                fourth_line = strrep(results_coll{o}, '_', ' ');
+                suptitle({first_line; second_line; third_line; fourth_line}); % add third line
+                
+                hold all
+                legend
+                set(gcf,'Position', get(0,'Screensize'));
+                set(gcf,'PaperPositionMode','auto');
+                
+                print(gcf, [analysis_folder, '/', results_coll{o}, '_', input.name, '_LV_', num2str(i) 'latent_', to_plot_collection{pp}, '_plot'], '-dpng', '-r0');
+                saveas(gcf, [analysis_folder, '/', results_coll{o}, '_', input.name, '_LV_', num2str(i) 'latent_', to_plot_collection{pp}, '_plot', '.fig']);
+                saveas(gcf, [analysis_folder, '/', results_coll{o}, '_', input.name, '_LV_', num2str(i) 'latent_', to_plot_collection{pp}, '_plot'],'epsc');
+                
+                close(gcf);
+                
+            end
+        end
+    end
+end
+
+save(strrep(results_path, '.mat', '_final_vis.mat'), 'input', 'output', 'setup');
+
+end

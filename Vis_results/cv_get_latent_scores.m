@@ -1,0 +1,100 @@
+%% DP function to get latent scores from SPLS results
+function latent_scores_table = cv_get_latent_scores(results_file, group_select, correct)
+load(results_file);
+% group_select = 'all'; % all OR fold
+% correct = 1; % 1=yes, 2=no
+latent_scores_all =[];
+latent_scores_names = [];
+RHO_all=[];
+
+switch group_select
+    case 'all'
+        try temp = load(input.Xs);
+            name_temp = fieldnames(temp);
+            Xs = temp.(name_temp{1});
+        catch
+            Xs = input.Xs;
+        end    
+        
+        %Y = input.Y;
+        
+        for i=1:(size(output.final_parameters,1))%-1)
+            
+               for num_m=1:size(Xs,2)
+                        IN_matrices.train{num_m} = Xs{num_m};
+                        IN_matrices.test{num_m} = Xs{num_m};
+                        if correct && isfield(input, 'covariates') 
+                            if i==1
+                                COV{num_m}.test = input.covariates{num_m};
+                                COV{num_m}.train = input.covariates{num_m};
+                            else
+                                COV{num_m}.train = nan(size(input.covariates,1),1);
+                                COV{num_m}.test = nan(size(input.covariates,1),1);
+                                input.correction_target(num_m) = 3;
+                            end
+                        else
+                            for num_m=1:size(IN_matrices.train,2)
+                    COV{num_m}.train = nan(size(input.Xs{num_m},1),1);
+                    COV{num_m}.test = nan(size(input.Xs{num_m},1),1);
+                end
+                            input.correction_target(num_m) = 3;
+                        end
+
+
+               end
+                
+            for num_m=1:size(IN_matrices.train,2)
+                if ~isempty(input.cs_method{num_m}.correction_subgroup)
+                    try labels_temp = input.data_complete.foranalysis.basic{input.Y_final.Properties.RowNames, 'Labels'};
+                    catch
+                    labels_temp = input.DiagNames;
+                end
+                cs_method{num_m}.correction_subgroup = input.cs_method{num_m}.correction_subgroup;
+                cs_method{num_m}.method = input.cs_method{num_m}.method;
+                cs_method{num_m}.subgroup_train = contains(labels_temp, cs_method{num_m}.correction_subgroup);
+                cs_method{num_m}.subgroup_test = contains(labels_temp, cs_method{num_m}.correction_subgroup);
+            else
+                cs_method{num_m}.correction_subgroup = [];
+                cs_method{num_m}.method = 'mean-centering';
+                cs_method{num_m}.subgroup_train = [];
+                cs_method{num_m}.subgroup_test = [];
+            end
+            end
+
+             [OUT_matrices] = cv_master_correctscale(IN_matrices, COV, cs_method, input.correction_target);
+
+            %IN_y.train = Y;
+            %IN_y.test = Y;
+            
+           
+                    
+            log_weights = matches(output.parameters_names, 'weights');
+            weights = output.final_parameters{i,log_weights};
+            
+            
+            [RHO, lVs, weights] = cv_mbspls_projection(OUT_matrices.train, weights, input.correlation_method, input.matrix_norm);
+            
+            Xs = cv_mbspls_proj_def(Xs, weights);
+            
+
+            RHO_all = [RHO_all, RHO];
+            latent_scores_all = [latent_scores_all, lVs];
+            for num_m=1:size(Xs,2)
+                omega_lV_names{1,num_m} = ['omega',num2str(num_m) ,'_LV', num2str(i)];
+            end
+            latent_scores_names = [latent_scores_names, omega_lV_names];
+            
+        end
+        
+        try latent_scores_table = array2table(latent_scores_all, 'RowNames', input.final_PSN, 'VariableNames', latent_scores_names);
+        catch
+            if isnumeric(input.final_ID{1})
+                input.final_ID = cellfun(@num2str, input.final_ID, 'UniformOutput', false);
+            end
+            latent_scores_table = array2table(latent_scores_all, 'RowNames', input.final_ID, 'VariableNames', latent_scores_names);
+        end
+    case 'fold'
+        
+        latent_scores_table = array2table([omega_all{3}, epsilon_all{3}, omega_all{4}, epsilon_all{4}], 'RowNames', input.final_PSN, 'VariableNames', {'omega_LV3', 'epsilon_LV3', 'omega_LV4', 'epsilon_LV4'});
+        
+end
