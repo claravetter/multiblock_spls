@@ -187,7 +187,7 @@ end
 if setup.max_sim_jobs > 1
     temp_pc = repelem(1:W, ceil(setup.num_jobs_perm/W)); %repelem(1:W, ceil(setup.max_sim_jobs/W));
     temp_pc(randi(setup.num_jobs_perm,1,size(temp_pc,2)-setup.num_jobs_perm))=[]; % temp_pc(randi(setup.max_sim_jobs,1,size(temp_pc,2)-setup.max_sim_jobs))=[];
-    perm_coding = [[1:setup.num_jobs_perm;temp_pc]; 1:(B/setup.max_sim_jobs):(B-1)]; % perm_coding = [[1:setup.max_sim_jobs;temp_pc]; 1:(B/setup.max_sim_jobs):(B-1)];
+    perm_coding = [[1:setup.num_jobs_perm;temp_pc]; 1:(B/setup.num_jobs_perm):(B-1)]; % perm_coding = [[1:setup.max_sim_jobs;temp_pc]; 1:(B/setup.max_sim_jobs):(B-1)];
     rest_perm = mod(B,size_sets_permutation);
     if rest_perm>0
         disp(['Please choose a number of permutation sets, which can be divided by ', num2str(setup.max_sim_jobs)]);
@@ -197,38 +197,6 @@ else
     perm_coding =  [1;1;1];
     perm_sets = 1; % also if 'sequential'
 end
-
-% if setup.max_sim_jobs > 1
-%     % Number of iterations required to process all folds given max_sim_jobs
-%     num_iterations = ceil(W / setup.max_sim_jobs);
-%     
-%     % Initialize the perm_coding matrix to cover W folds
-%     perm_coding = zeros(3, W);  % 3 rows for job, fold, and permutation start
-%     
-%     % Distribute the folds across the jobs
-%     perm_coding(1, :) = 1:W;  % Folds (first row, covering W)
-%     
-%     % Cyclic job assignment to folds (second row)
-%     perm_coding(2, :) = mod(0:W-1, setup.max_sim_jobs) + 1;  % Cycles through jobs for each fold
-%     
-%     % Calculate increment step for the third row (B divided by max_sim_jobs)
-%     increment_step = B / setup.max_sim_jobs;  % B is n_perm in this context
-%     
-%     % Assign permutation start points (third row, increment by B/max_sim_jobs)
-%     for i = 1:setup.max_sim_jobs
-%         perm_coding(3, perm_coding(2,:) == i) = (i-1) * increment_step + 1;
-%     end
-%     
-%     % Calculate permutations based on setup.max_sim_jobs
-%     rest_perm = mod(B, size_sets_permutation);
-%     if rest_perm > 0
-%         disp(['Please choose a number of permutation sets, which can be divided by ', num2str(setup.max_sim_jobs)]);
-%     end
-%     perm_sets = (B - rest_perm) / size_sets_permutation;
-% else
-%     perm_coding = [1; 1; 1];  % Sequential case
-%     perm_sets = 1;
-% end
 
 
 
@@ -307,7 +275,7 @@ while count_ns<input.coun_ts_limit && (input.max_n_LVs == -1 || n_LV < input.max
                 end
                 input.size_sets_hyperopt = round(temp_density/setup.num_jobs_hyperopt); %round(temp_density/setup.max_sim_jobs);
             case 'randomized_search'
-                input.size_sets_hyperopt   = round(input.randomized_search_params.randomized_search_iterations/setup.max_sim_jobs);
+                input.size_sets_hyperopt = round(input.randomized_search_params.randomized_search_iterations/setup.num_jobs_hyperopt); % round(input.randomized_search_params.randomized_search_iterations/setup.max_sim_jobs);
 
         end
 
@@ -691,11 +659,14 @@ while count_ns<input.coun_ts_limit && (input.max_n_LVs == -1 || n_LV < input.max
                 switch selection_retrain
                     case 1 % retrain on entirety of outer folds
 
-                        [RHO_opt_collection(1,nn), weights_opt_collection(:,nn), Vs_opt_collection_temp, lVs_opt_temp] = cv_mbspls_wrapper(OUT_matrices.train, OUT_matrices.test, c_weights_opt, correlation_method, matrix_norm);
+                        [RHO_opt_collection(1,nn), weights_opt_collection(:,nn), Vs_opt_collection_temp, lVs_opt_temp, success] = cv_mbspls_wrapper(OUT_matrices.train, OUT_matrices.test, c_weights_opt, correlation_method, matrix_norm);
                         Vs_opt_collection = cat(3, Vs_opt_collection, Vs_opt_collection_temp);
 
 
-
+                        if ~success
+                            break
+                        end
+                        
                         if weights_log
                             if input.framework == 3
                                 ratio = size(output.CV.cv_outer_indices.TestInd{1,w},1)/size(cat(1,output.CV.cv_outer_indices.TestInd{1,:}),1);
@@ -997,7 +968,7 @@ while count_ns<input.coun_ts_limit && (input.max_n_LVs == -1 || n_LV < input.max
     lv_name = ['LV_', num2str(n_LV)];
     
     % CV 20.08.2024: check bootstrap stability (delete later)
-    save([detailed_results '/bootstrap_results_' lv_name '.mat'], 'RHO_boot', 'weights_boot', 'train_data_matrices', 'train_covariates', 'c_weights_opt');
+    save([detailed_results '/bootstrap_results_' lv_name '.mat'], 'RHO_boot', 'weights_boot', 'c_weights_opt');
 
     % Optimizsation criterion
     RHO_analysis = output.final_parameters{n_LV, matches(output.opt_parameters_names, 'RHO')};

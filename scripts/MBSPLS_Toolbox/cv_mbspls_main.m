@@ -252,8 +252,9 @@ if count_ns > 0
     end
 end
 
+success_LV = true; 
 
-while count_ns<input.coun_ts_limit && (input.max_n_LVs == -1 || n_LV < input.max_n_LVs) % if max_n_LV = -1, no maximum set
+while count_ns<input.coun_ts_limit && success_LV && (input.max_n_LVs == -1 || n_LV < input.max_n_LVs) % if max_n_LV = -1, no maximum set
     % repeats the entire process W times to obtain W different final p values,
     % which go into the omnibus hypothesis
 
@@ -659,11 +660,10 @@ while count_ns<input.coun_ts_limit && (input.max_n_LVs == -1 || n_LV < input.max
                 switch selection_retrain
                     case 1 % retrain on entirety of outer folds
 
-                        [RHO_opt_collection(1,nn), weights_opt_collection(:,nn), Vs_opt_collection_temp, lVs_opt_temp] = cv_mbspls_wrapper(OUT_matrices.train, OUT_matrices.test, c_weights_opt, correlation_method, matrix_norm);
+                        [RHO_opt_collection(1,nn), weights_opt_collection(:,nn), Vs_opt_collection_temp, lVs_opt_temp, success_LV] = cv_mbspls_wrapper(OUT_matrices.train, OUT_matrices.test, c_weights_opt, correlation_method, matrix_norm);
                         Vs_opt_collection = cat(3, Vs_opt_collection, Vs_opt_collection_temp);
 
-
-
+                        
                         if weights_log
                             if input.framework == 3
                                 ratio = size(output.CV.cv_outer_indices.TestInd{1,w},1)/size(cat(1,output.CV.cv_outer_indices.TestInd{1,:}),1);
