@@ -10,7 +10,7 @@ matlab_version = ['R', version('-release')];
 
 %% change
 compiled_mbspls_directory = '/volume/projects/CV_gs_PLS/ScrFun/Compilations/';
-compiled_mbspls_name = ['MBSPLS_DEV_Aug2024_bootsample_' matlab_version];
+compiled_mbspls_name = ['MBSPLS_DEV_Sep2024_' matlab_version];
 compiled_mbspls_version = 'v1';
 mbspls_directory = '/volume/projects/CV_gs_PLS/ScrFun/multiblock_spls/scripts/MBSPLS_Toolbox';
 mbspls_main_script = fullfile(mbspls_directory, 'cv_mbspls_main.m');
@@ -30,7 +30,7 @@ compile_bootstrap = 1;
 log_file = fullfile(compiled_mbspls_directory, 'compilation.log');
 [~, username] = system('whoami');
 username = strtrim(username); 
-user_note = 'bootstrap debugging'; % change
+user_note = 'r2023b test'; % change
 current_time = datestr(now, 'yyyy-mm-dd HH:MM:SS'); 
 log_entry = sprintf('\n\n%s - %s\nCompiled by %s\nChanges: %s \nMain: %d, Hyperopt: %d, Permutation: %d, Bootstrap: %d\nPath: %s', ...
     current_time, compiled_mbspls_name, username, user_note, compile_main, compile_hyperopt, compile_permutation, compile_bootstrap, fullfile(compiled_mbspls_directory, compiled_mbspls_name));

@@ -183,11 +183,11 @@ if input.save_CV
     clear CV;
 end
 %save permutation setup files; CV:this causes a bug if max_sim_jobs = 1
-
+% 
 if setup.max_sim_jobs > 1
-    temp_pc = repelem(1:W, ceil(setup.max_sim_jobs/W));
-    temp_pc(randi(setup.max_sim_jobs,1,size(temp_pc,2)-setup.max_sim_jobs))=[];
-    perm_coding = [[1:setup.max_sim_jobs;temp_pc]; 1:(B/setup.max_sim_jobs):(B-1)];
+    temp_pc = repelem(1:W, ceil(setup.num_jobs_perm/W)); %repelem(1:W, ceil(setup.max_sim_jobs/W));
+    temp_pc(randi(setup.num_jobs_perm,1,size(temp_pc,2)-setup.num_jobs_perm))=[]; % temp_pc(randi(setup.max_sim_jobs,1,size(temp_pc,2)-setup.max_sim_jobs))=[];
+    perm_coding = [[1:setup.num_jobs_perm;temp_pc]; 1:(B/setup.max_sim_jobs):(B-1)]; % perm_coding = [[1:setup.max_sim_jobs;temp_pc]; 1:(B/setup.max_sim_jobs):(B-1)];
     rest_perm = mod(B,size_sets_permutation);
     if rest_perm>0
         disp(['Please choose a number of permutation sets, which can be divided by ', num2str(setup.max_sim_jobs)]);
@@ -196,19 +196,54 @@ if setup.max_sim_jobs > 1
 else
     perm_coding =  [1;1;1];
     perm_sets = 1; % also if 'sequential'
-
 end
+
+% if setup.max_sim_jobs > 1
+%     % Number of iterations required to process all folds given max_sim_jobs
+%     num_iterations = ceil(W / setup.max_sim_jobs);
+%     
+%     % Initialize the perm_coding matrix to cover W folds
+%     perm_coding = zeros(3, W);  % 3 rows for job, fold, and permutation start
+%     
+%     % Distribute the folds across the jobs
+%     perm_coding(1, :) = 1:W;  % Folds (first row, covering W)
+%     
+%     % Cyclic job assignment to folds (second row)
+%     perm_coding(2, :) = mod(0:W-1, setup.max_sim_jobs) + 1;  % Cycles through jobs for each fold
+%     
+%     % Calculate increment step for the third row (B divided by max_sim_jobs)
+%     increment_step = B / setup.max_sim_jobs;  % B is n_perm in this context
+%     
+%     % Assign permutation start points (third row, increment by B/max_sim_jobs)
+%     for i = 1:setup.max_sim_jobs
+%         perm_coding(3, perm_coding(2,:) == i) = (i-1) * increment_step + 1;
+%     end
+%     
+%     % Calculate permutations based on setup.max_sim_jobs
+%     rest_perm = mod(B, size_sets_permutation);
+%     if rest_perm > 0
+%         disp(['Please choose a number of permutation sets, which can be divided by ', num2str(setup.max_sim_jobs)]);
+%     end
+%     perm_sets = (B - rest_perm) / size_sets_permutation;
+% else
+%     perm_coding = [1; 1; 1];  % Sequential case
+%     perm_sets = 1;
+% end
+
+
+
+
 rest_boot = mod(input.bootstrap_testing, size_sets_bootstrap);
 if rest_boot>0
     disp(['Please choose a number of bootstrap sets, which can be divided by ', num2str(setup.max_sim_jobs)]);
 end
 boot_sets = (input.bootstrap_testing - rest_boot)/size_sets_bootstrap;
 
-if isfield(input, 'procrustes_flag')
-    procrustes_flag = input.procrustes_flag; 
-else
-    procrustes_flag = true;
-end
+% if isfield(input, 'procrustes_flag')
+procrustes_flag = input.procrustes_flag; 
+% else
+%     procrustes_flag = true;
+% end
 save([permutation_folder '/permutation_setup.mat'],'selection_train', 'mbspls_params','correlation_method', 'matrix_norm', 'size_sets_permutation', 'perm_coding', 'selection_retrain', 'correction_target', 'procrustes_flag', '-v7.3');
 save([bootstrap_folder '/bootstrap_setup.mat'],'selection_train', 'mbspls_params', 'correlation_method', 'matrix_norm', 'size_sets_bootstrap', 'correction_target',  'procrustes_flag','-v7.3');
 
@@ -270,7 +305,7 @@ while count_ns<input.coun_ts_limit && (input.max_n_LVs == -1 || n_LV < input.max
                 for num_m=1:num_matrices
                     temp_density = search_params(num_m).density*temp_density;
                 end
-                input.size_sets_hyperopt = round(temp_density/setup.max_sim_jobs);
+                input.size_sets_hyperopt = round(temp_density/setup.num_jobs_hyperopt); %round(temp_density/setup.max_sim_jobs);
             case 'randomized_search'
                 input.size_sets_hyperopt   = round(input.randomized_search_params.randomized_search_iterations/setup.max_sim_jobs);
 
@@ -935,7 +970,7 @@ while count_ns<input.coun_ts_limit && (input.max_n_LVs == -1 || n_LV < input.max
 
     for num_m=1:size(input.Xs,2)
         train_covariates{num_m} = Covars_ana{num_m}(output.CV.cv_outer_indices.TrainInd{ob,w_opt},:);
-        train_data_matrices{num_m} = matrices_ana{num_m}(output.CV.cv_outer_indices.TrainInd{ob,w_opt},:);
+%         train_data_matrices{num_m} = matrices_ana{num_m}(output.CV.cv_outer_indices.TrainInd{ob,w_opt},:);
     end
     train_DiagNames = DiagNames_ana(output.CV.cv_outer_indices.TrainInd{ob,w_opt},:);
 
@@ -944,8 +979,8 @@ while count_ns<input.coun_ts_limit && (input.max_n_LVs == -1 || n_LV < input.max
 
     save([bootstrap_folder '/bootstrap_opt.mat'], 'c_weights_opt','Vs_opt','-v7.3');
 
-    %wrapper_train_opt = @(x) get_split_matrix(x, output.CV.cv_outer_indices.TrainInd{ob,w_opt}) ;
-    %train_data_matrices = cellfun(wrapper_train_opt, matrices_ana, UniformOutput=false);
+    wrapper_train_opt = @(x) get_split_matrix(x, output.CV.cv_outer_indices.TrainInd{ob,w_opt}) ;
+    train_data_matrices = cellfun(wrapper_train_opt, matrices_ana, UniformOutput=false);
 
 
     % save the optimized parameters and the permutation matrix

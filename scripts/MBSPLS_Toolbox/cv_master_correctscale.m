@@ -43,14 +43,14 @@ if isfield(IN, 'train')
         else
             cs_method_temp = cs_method;
         end
-        if correction_target(i) == 1
-            OUT_temp = dp_correctscale(IN_temp,COV_temp,cs_method_temp);
+       % if correction_target(i) == 1
+            OUT_temp = cv_correctscale(IN_temp,COV_temp,cs_method_temp);
             OUT.train{i} = OUT_temp.train;
             OUT.test{i} = OUT_temp.test;
-        else
-            OUT.train{i} = IN_temp.train;
-            OUT.test{i} = IN_temp.test;
-        end
+      %  else
+        %    OUT.train{i} = IN_temp.train;
+       %     OUT.test{i} = IN_temp.test;
+       % end
 
 
     end
@@ -84,7 +84,7 @@ else
             cs_method_temp = cs_method{1};
         end
         if correction_target(i) == 1
-            OUT_temp = dp_correctscale(IN_temp,COV_temp,cs_method_temp);
+            OUT_temp = cv_correctscale(IN_temp,COV_temp,cs_method_temp);
             OUT{i} = OUT_temp;
         else
             OUT{i} = IN_temp;

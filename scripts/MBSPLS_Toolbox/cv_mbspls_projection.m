@@ -23,12 +23,12 @@ if size(lVs,2) == 2 && matrix_norm == 0
         RHO = corr(lVs(:, 1), lVs(:, 2), 'Type', correlation_method);
     end
 else
-    for num_m = 1:length(data)
-    if sum(weights{num_m})<0 
-        weights{num_m} = f_invert(weights{num_m});
-        lVs(:, num_m) = data{num_m}*weights{num_m};
-    end
-    end
+%     for num_m = 1:length(data)
+%         if sum(weights{num_m})<0
+%             weights{num_m} = f_invert(weights{num_m});
+%             lVs(:, num_m) = data{num_m}*weights{num_m};
+%         end
+%     end
     corr_lVs = corr(lVs,'Type', correlation_method);
     if exist('matrix_norm', 'var')
         mn = norm(corr_lVs, matrix_norm); % 'fro', 1, 2, Inf

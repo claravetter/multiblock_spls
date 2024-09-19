@@ -22,9 +22,9 @@ labels = m_data.train_DiagNames;
 cs_method_bootstrap = m_data.cs_method;
 correction_target = m_setup.correction_target;
 
-%[~,bootsam] = bootstrp(m_setup.size_sets_bootstrap,[],1:size(train_data_matrices{1},1));
+[~,bootsam] = bootstrp(m_setup.size_sets_bootstrap,[],1:size(train_data_matrices{1},1));
 
-bootsam = [bootsam, [1:size(train_data_matrices{1},1)]'];
+%bootsam = [bootsam, [1:size(train_data_matrices{1},1)]'];
 
 % perform procrustean transformation to minimize rotation effects of
 % permutated y matrix, if V_opt available

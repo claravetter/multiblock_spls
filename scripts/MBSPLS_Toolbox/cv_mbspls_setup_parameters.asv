@@ -122,12 +122,9 @@ try
                 grid_size = input.randomized_search_params.randomized_search_iterations;
         end
     end
-    %num_jobs = gcd_of_three(input.permutation_testing, input.bootstrap_testing, grid_size, setup.max_sim_jobs);
-    %setup.max_sim_jobs = num_jobs;
+    num_jobs = gcd_of_three(input.permutation_testing, input.bootstrap_testing, grid_size, setup.max_sim_jobs);
+    setup.max_sim_jobs = num_jobs;
 
-    setup.num_jobs_perm = gcd(input.permutation_testing, setup.max_sim_jobs);
-    setup.num_jobs_boot = gcd(input.bootstrap_testing, setup.max_sim_jobs);
-    setup.num_jobs_hyperopt = gcd(grid_size, setup.max_sim_jobs);
 
 
 catch

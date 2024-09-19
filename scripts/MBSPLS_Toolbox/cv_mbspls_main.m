@@ -183,11 +183,11 @@ if input.save_CV
     clear CV;
 end
 %save permutation setup files; CV:this causes a bug if max_sim_jobs = 1
-
+% 
 if setup.max_sim_jobs > 1
-    temp_pc = repelem(1:W, ceil(setup.max_sim_jobs/W));
-    temp_pc(randi(setup.max_sim_jobs,1,size(temp_pc,2)-setup.max_sim_jobs))=[];
-    perm_coding = [[1:setup.max_sim_jobs;temp_pc]; 1:(B/setup.max_sim_jobs):(B-1)];
+    temp_pc = repelem(1:W, ceil(setup.num_jobs_perm/W)); %repelem(1:W, ceil(setup.max_sim_jobs/W));
+    temp_pc(randi(setup.num_jobs_perm,1,size(temp_pc,2)-setup.num_jobs_perm))=[]; % temp_pc(randi(setup.max_sim_jobs,1,size(temp_pc,2)-setup.max_sim_jobs))=[];
+    perm_coding = [[1:setup.num_jobs_perm;temp_pc]; 1:(B/setup.num_jobs_perm):(B-1)]; % perm_coding = [[1:setup.max_sim_jobs;temp_pc]; 1:(B/setup.max_sim_jobs):(B-1)];
     rest_perm = mod(B,size_sets_permutation);
     if rest_perm>0
         disp(['Please choose a number of permutation sets, which can be divided by ', num2str(setup.max_sim_jobs)]);
@@ -196,19 +196,22 @@ if setup.max_sim_jobs > 1
 else
     perm_coding =  [1;1;1];
     perm_sets = 1; % also if 'sequential'
-
 end
+
+
+
+
 rest_boot = mod(input.bootstrap_testing, size_sets_bootstrap);
 if rest_boot>0
     disp(['Please choose a number of bootstrap sets, which can be divided by ', num2str(setup.max_sim_jobs)]);
 end
 boot_sets = (input.bootstrap_testing - rest_boot)/size_sets_bootstrap;
 
-if isfield(input, 'procrustes_flag')
-    procrustes_flag = input.procrustes_flag; 
-else
-    procrustes_flag = true;
-end
+% if isfield(input, 'procrustes_flag')
+procrustes_flag = input.procrustes_flag; 
+% else
+%     procrustes_flag = true;
+% end
 save([permutation_folder '/permutation_setup.mat'],'selection_train', 'mbspls_params','correlation_method', 'matrix_norm', 'size_sets_permutation', 'perm_coding', 'selection_retrain', 'correction_target', 'procrustes_flag', '-v7.3');
 save([bootstrap_folder '/bootstrap_setup.mat'],'selection_train', 'mbspls_params', 'correlation_method', 'matrix_norm', 'size_sets_bootstrap', 'correction_target',  'procrustes_flag','-v7.3');
 
@@ -270,9 +273,9 @@ while count_ns<input.coun_ts_limit && (input.max_n_LVs == -1 || n_LV < input.max
                 for num_m=1:num_matrices
                     temp_density = search_params(num_m).density*temp_density;
                 end
-                input.size_sets_hyperopt = round(temp_density/setup.max_sim_jobs);
+                input.size_sets_hyperopt = round(temp_density/setup.num_jobs_hyperopt); %round(temp_density/setup.max_sim_jobs);
             case 'randomized_search'
-                input.size_sets_hyperopt   = round(input.randomized_search_params.randomized_search_iterations/setup.max_sim_jobs);
+                input.size_sets_hyperopt = round(input.randomized_search_params.randomized_search_iterations/setup.num_jobs_hyperopt); % round(input.randomized_search_params.randomized_search_iterations/setup.max_sim_jobs);
 
         end
 
@@ -962,7 +965,7 @@ while count_ns<input.coun_ts_limit && (input.max_n_LVs == -1 || n_LV < input.max
     lv_name = ['LV_', num2str(n_LV)];
     
     % CV 20.08.2024: check bootstrap stability (delete later)
-    save([detailed_results '/bootstrap_results_' lv_name '.mat'], 'RHO_boot', 'weights_boot', 'train_data_matrices', 'train_covariates', 'c_weights_opt');
+    save([detailed_results '/bootstrap_results_' lv_name '.mat'], 'RHO_boot', 'weights_boot', 'c_weights_opt');
 
     % Optimizsation criterion
     RHO_analysis = output.final_parameters{n_LV, matches(output.opt_parameters_names, 'RHO')};
