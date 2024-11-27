@@ -15,7 +15,7 @@ if size(lVs,2) == 2 && matrix_norm == 0
         RHO = corr(lVs(:, 1), lVs(:, 2), 'Type', correlation_method);
     end
 
-    if sum(weights{2})<0 % easier interpretation; v = phenotypic vector
+    if flip_flag && sum(weights{2})<0 % easier interpretation; v = phenotypic vector
         weights{1} = f_invert(weights{1});
         weights{2} = f_invert(weights{2});
         lVs(:, 1) = data{1}*weights{1};
@@ -23,14 +23,13 @@ if size(lVs,2) == 2 && matrix_norm == 0
         RHO = corr(lVs(:, 1), lVs(:, 2), 'Type', correlation_method);
     end
 else
-    for num_m = 1:length(data)
-    if sum(weights{num_m})<0 % easier interpretation; v = phenotypic vector
-        weights{num_m} = f_invert(weights{num_m});
-        weights{2} = f_invert(weights{2});
-        lVs(:, 1) = data{1}*weights{1};
-        lVs(:, 2) = data{2}*weights{2};
-        RHO = corr(lVs(:, 1), lVs(:, 2), 'Type', correlation_method);
-    end
+    if flip_flag
+        for num_m = 1:length(data)
+            if sum(weights{num_m})<0
+                weights{num_m} = f_invert(weights{num_m});
+                lVs(:, num_m) = data{num_m}*weights{num_m};
+            end
+        end
     end
     corr_lVs = corr(lVs,'Type', correlation_method);
     if exist('matrix_norm', 'var')

@@ -58,7 +58,7 @@ for i=1:size(results_collection,2)
             correct_log = false;
     end
 
-    %latent_scores_table = cv_get_latent_scores(results_collection{i}, 'all', correct_log);
+    latent_scores_table = cv_get_latent_scores(results_collection{i}, 'all', correct_log, flip_flag);
     %writetable(latent_scores_table, [vis_folder, '/LV_results.xlsx'], 'WriteRowNames', true, 'Sheet', 'latent_scores_table');
 %%
     boot_options = {'CI', 'BS'};

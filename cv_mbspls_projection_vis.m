@@ -1,5 +1,5 @@
 %% DP function for projection of u and v onto test data
-function [RHO, lVs, weights] = cv_mbspls_projection(data, weights, correlation_method, matrix_norm)
+function [RHO, lVs, weights] = cv_mbspls_projection_vis(data, weights, correlation_method, matrix_norm, flip_flag)
 
 for i=1:length(data)
     lVs(:,i) = data{i}*weights{i};
@@ -23,14 +23,19 @@ if size(lVs,2) == 2 && matrix_norm == 0
         RHO = corr(lVs(:, 1), lVs(:, 2), 'Type', correlation_method);
     end
 else
-    % if flip_flag
-    %     for num_m = 1:length(data)
-    %         if sum(weights{num_m})<0
-    %             weights{num_m} = f_invert(weights{num_m});
-    %             lVs(:, num_m) = data{num_m}*weights{num_m};
-    %         end
-    %     end
-    % end
+    if flip_flag
+        for num_m = 1:length(data)
+            weights{num_m} = f_invert(weights{num_m});
+            lVs(:, num_m) = data{num_m}*weights{num_m};
+        end
+        % for num_m = 1:length(data)
+        %     if sum(weights{num_m})<0
+        %         weights{num_m} = f_invert(weights{num_m});
+        %         lVs(:, num_m) = data{num_m}*weights{num_m};
+        %     end
+        % end
+
+    end
     corr_lVs = corr(lVs,'Type', correlation_method);
     if exist('matrix_norm', 'var')
         mn = norm(corr_lVs, matrix_norm); % 'fro', 1, 2, Inf
