@@ -73,6 +73,7 @@ elseif isstruct(DAT) % perform on train and apply to test dataset
         % standardization of data and covariates
         [DAT.train_s, DAT.test_s] = dp_standardize_comb(DAT.train, DAT.test, IN_s);
         
+        %if any(isnan(DAT.train_s))
             
         [DAT.train_s, DAT.test_s] = cv_impute_comb(DAT.train_s, DAT.test_s);
                 
