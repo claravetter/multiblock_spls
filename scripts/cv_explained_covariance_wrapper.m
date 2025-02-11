@@ -1,0 +1,28 @@
+function [explained_covariance_per_component,total_explained_covariance] = cv_explained_covariance_wrapper(latentscores_file, resultpath)
+% 'Tables/Latent_Scores.xlsx'
+load(resultpath)
+Xs = input.Xs; 
+
+
+% Center and scale Xs; replace with covariate and standardisation as in
+% training
+for i = 1:size(Xs,2)
+    Xs{i} = (Xs{i} - mean(Xs{i}, 1)) ./ std(Xs{i}, 0, 1);
+end
+% Get all sheet names in the Excel file
+lv_sheets = sheetnames(latentscores_file);
+
+n_LVs = size(lv_sheets,1);
+% Loop through each LV
+Ts = {};
+for i = 1:n_LVs
+    lv_sheet = lv_sheets{i};
+    LV = readmatrix(latentscores_file, 'Sheet', lv_sheet);
+    for num_m = 1:size(Xs,2)
+        Ts{num_m}(:,i) = LV(:,1+num_m);
+    end
+end
+
+[explained_covariance_per_component, total_explained_covariance] = cv_compute_explained_covariance_LV(Xs, Ts);
+
+end
