@@ -51,7 +51,7 @@ switch IN.type % 1 = nested cross-validation, 2 = random hold-out splits, 3 = LS
             for w=1:size(IN.labels,2)
                 CV.cv_outer_test_labels{1,w} = IN.sublabels(CV.cv_outer_indices.TestInd{1,w},:);
                 CV.cv_outer_train_labels{1,w} = IN.sublabels(CV.cv_outer_indices.TrainInd{1,w},:);
-                CV.cv_inner_indices{1,w} = nk_CVpartition2(IN.IB, IN.IF, CV.cv_outer_train_labels{1,w});
+                CV.cv_inner_indices{1,w} = nk_CVpartition(IN.IB, IN.IF, CV.cv_outer_train_labels{1,w});
             end
         end
     case 4

@@ -106,7 +106,7 @@ if isfield(input, 'validation_set')
                     val_labels(i,1) = input.Diag(i,1)*10 + find(input.sites(i,:));
                 end
         end
-        output.validation_indices = nk_CVpartition2(1, validation_folds, val_labels);
+        output.validation_indices = nk_CVpartition(1, validation_folds, val_labels);
         analysis_set = sort(output.validation_indices.TrainInd{1,1});
         validation_set = sort(output.validation_indices.TestInd{1,1});
     else
@@ -329,7 +329,7 @@ while count_ns<input.coun_ts_limit && success_LV && (input.max_n_LVs == -1 || n_
 
         end
 
-        correction_target = ones(size(input.matrices,2),1);
+        correction_target = ones(size(input.Xs,2),1);
 
     end
 
@@ -1095,7 +1095,6 @@ while count_ns<input.coun_ts_limit && success_LV && (input.max_n_LVs == -1 || n_
 
         success_val=true;
 
-
         output.validation_results(n_LV,:) = {n_LV c_weights_opt weights_opt success_val RHO_opt p lVs_val};
 
 
@@ -1119,13 +1118,13 @@ while count_ns<input.coun_ts_limit && success_LV && (input.max_n_LVs == -1 || n_
     if ~islogical(input.validation_set)
         for num_m=1:num_matrices
             weights{num_m} = output.validation_results{n_LV,opt_weights{num_m}}; % weight vector for matrix num_m
-            [matrices_val{num_m}] = proj_def_single(matrices_val{num_m}, weights{num_m});
+            [matrices_val{num_m}] = cv_proj_def_single(matrices_val{num_m}, weights{num_m});
         end
         
     else
         for num_m=1:num_matrices
             weights{num_m} = output.final_parameters{n_LV,opt_weights}; % weight vector for matrix num_m
-            matrices_ana{num_m} = proj_def_single(matrices_ana{num_m}, weights{1}{num_m});
+            matrices_ana{num_m} = cv_proj_def_single(matrices_ana{num_m}, weights{1}{num_m});
         end
 
     end

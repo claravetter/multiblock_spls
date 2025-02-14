@@ -1,11 +1,7 @@
 
 function [OUT] = cv_master_correctscale(IN, COV, cs_method, correction_target)
 
-if ~isfield(IN, 'knnimpute_k')
-    k = 5;
-else
-    k = IN.knnimpute_k;
-end
+
 
 if isfield(IN, 'train')
     for i = 1:length(IN.train) % number matrices
@@ -43,11 +39,11 @@ if isfield(IN, 'train')
         else
             cs_method_temp = cs_method;
         end
-       % if correction_target(i) == 1
-            OUT_temp = cv_correctscale(IN_temp,COV_temp,cs_method_temp);
-            OUT.train{i} = OUT_temp.train;
-            OUT.test{i} = OUT_temp.test;
-      %  else
+        % if correction_target(i) == 1
+        OUT_temp = cv_correctscale(IN_temp,COV_temp,cs_method_temp);
+        OUT.train{i} = OUT_temp.train;
+        OUT.test{i} = OUT_temp.test;
+        %  else
         %    OUT.train{i} = IN_temp.train;
        %     OUT.test{i} = IN_temp.test;
        % end

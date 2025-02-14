@@ -23,8 +23,8 @@ if isfield(input, 'X') && ~isempty(input.X)
     end
     matrices = [];
 else
-    if isfield(input, 'matrices')
-        matrices = cellfun(@load_matrices,input.matrices, UniformOutput=false);
+    if isfield(input, 'Xs')
+        matrices = cellfun(@load_matrices,input.Xs, UniformOutput=false);
         X = [];
         Y = [];
     end
@@ -66,7 +66,7 @@ switch input.optimization_strategy
                 input.grid_dynamic.LV_1.x   = struct('start', 1, 'end', 0, 'density', input.grid_static);
                 input.grid_dynamic.LV_1.y   = struct('start', 1, 'end', 0, 'density', input.grid_static);
             else
-                if isfield(input, 'matrices') % CV: TO DO - what is static grid?
+                if isfield(input, 'Xs') % CV: TO DO - what is static grid?
                     %input.grid_dynamic.LVs.x   = struct('start', 1, 'end', 0, 'density', input.grid_static);
                 end
             end
@@ -85,15 +85,15 @@ switch input.optimization_strategy
     end
 
     if ~isfield(input.randomized_search_params, 'hyperparam_distributions') 
-        for num_m=1:size(input.matrices, 2)
-            if size(input.matrices{num_m},2) > 1
-                input.randomized_search_params.hyperparam_distributions{num_m} = makedist('uniform', 1, sqrt(size(input.matrices{num_m},2))); % CV: check if 1 and sqrt are correct range
+        for num_m=1:size(input.Xs, 2)
+            if size(input.Xs{num_m},2) > 1
+                input.randomized_search_params.hyperparam_distributions{num_m} = makedist('uniform', 1, sqrt(size(input.Xs{num_m},2))); % CV: check if 1 and sqrt are correct range
             else
                 input.randomized_search_params.hyperparam_distributions{num_m} = 1;
             end
         end
     else
-        if size(input.randomized_search_params.hyperparam_distributions, 2) ~= size(input.matrices, 2)
+        if size(input.randomized_search_params.hyperparam_distributions, 2) ~= size(input.Xs, 2)
             error('check your input parameters: input.randomized_search_params.hyperparam_distributions');
         end
     end
@@ -115,7 +115,7 @@ try
             case 'grid_search'
                 grid = input.grid_dynamic.LVs;
                 grid_size = 1;
-                for num_m=1:size(matrices,2)
+                for num_m=1:size(input.Xs,2)
                     grid_size = grid(num_m).density*grid_size;
                 end
             case 'randomized_search'
@@ -261,6 +261,7 @@ matrix_norm = input.matrix_norm;
 if ~isfield(input, 'cs_method') % actually this should only be necessary if correction is activated for at least one matrix, consider changing (I think bootstrap funciton would need to be adjusted then as well) 
     cs_method.method = 'mean-centering';
     cs_method.correction_subgroup = '';
+    cs_method.covars_correct_method = 'partial_correlations';
     for i=1:size(matrices,2) % add same settings for each matrix 
         input.cs_method{1,i} = cs_method;
     end
@@ -273,7 +274,6 @@ cs_method = input.cs_method;
 if size(input.cs_method,2) < size(matrices,2)
     for i=1:size(input.cs_method,2)
         cs_method_temp{i} = input.cs_method{i};
-
     end
     for i=(size(input.cs_method,2)+1):size(matrices,2) % add same settings for each matrix 
         cs_method_temp{i} = input.cs_method{1};

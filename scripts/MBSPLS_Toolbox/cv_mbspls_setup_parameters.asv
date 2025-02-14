@@ -23,8 +23,8 @@ if isfield(input, 'X') && ~isempty(input.X)
     end
     matrices = [];
 else
-    if isfield(input, 'matrices')
-        matrices = cellfun(@load_matrices,input.matrices, UniformOutput=false);
+    if isfield(input, 'Xs')
+        matrices = cellfun(@load_matrices,input.Xs, UniformOutput=false);
         X = [];
         Y = [];
     end
@@ -85,15 +85,15 @@ switch input.optimization_strategy
     end
 
     if ~isfield(input.randomized_search_params, 'hyperparam_distributions') 
-        for num_m=1:size(input.matrices, 2)
-            if size(input.matrices{num_m},2) > 1
-                input.randomized_search_params.hyperparam_distributions{num_m} = makedist('uniform', 1, sqrt(size(input.matrices{num_m},2))); % CV: check if 1 and sqrt are correct range
+        for num_m=1:size(input.Xs, 2)
+            if size(input.Xs{num_m},2) > 1
+                input.randomized_search_params.hyperparam_distributions{num_m} = makedist('uniform', 1, sqrt(size(input.Xs{num_m},2))); % CV: check if 1 and sqrt are correct range
             else
                 input.randomized_search_params.hyperparam_distributions{num_m} = 1;
             end
         end
     else
-        if size(input.randomized_search_params.hyperparam_distributions, 2) ~= size(input.matrices, 2)
+        if size(input.randomized_search_params.hyperparam_distributions, 2) ~= size(input.Xs, 2)
             error('check your input parameters: input.randomized_search_params.hyperparam_distributions');
         end
     end
@@ -115,16 +115,19 @@ try
             case 'grid_search'
                 grid = input.grid_dynamic.LVs;
                 grid_size = 1;
-                for num_m=1:size(matrices,2)
+                for num_m=1:size(input.Xs,2)
                     grid_size = grid(num_m).density*grid_size;
                 end
             case 'randomized_search'
                 grid_size = input.randomized_search_params.randomized_search_iterations;
         end
     end
-    num_jobs = gcd_of_three(input.permutation_testing, input.bootstrap_testing, grid_size, setup.max_sim_jobs);
-    setup.max_sim_jobs = num_jobs;
+    %num_jobs = gcd_of_three(input.permutation_testing, input.bootstrap_testing, grid_size, setup.max_sim_jobs);
+    %setup.max_sim_jobs = num_jobs;
 
+    setup.num_jobs_perm = gcd(input.permutation_testing, setup.max_sim_jobs);
+    setup.num_jobs_boot = gcd(input.bootstrap_testing, setup.max_sim_jobs);
+    setup.num_jobs_hyperopt = gcd(grid_size, setup.max_sim_jobs);
 
 
 catch
