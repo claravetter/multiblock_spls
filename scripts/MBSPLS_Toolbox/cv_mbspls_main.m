@@ -29,15 +29,15 @@ if ~exist('n_LV', 'var') % i.e., analysis is fresh, and not one to be continued 
     [permutation_folder, hyperopt_folder, bootstrap_folder, detailed_results, final_results] = dp_create_folders(setup.scratch_space, analysis_folder, analysis_name);
 
 else
-%     analysis_folder = setup.analysis_folder;
-%     analysis_name = setup.analysis_name;
-%     permutation_folder = aux.permutation_folder;
-%     hyperopt_folder = aux.hyperopt_folder;
-%     bootstrap_folder = aux.boostrap_folder;
-%     n_LV = aux.n_LV;
-%     count_ns = aux.count_ns;
-%     matrices_ana = aux.matrices_ana;
-%     matrices_val = aux.matrices_val;
+    %     analysis_folder = setup.analysis_folder;
+    %     analysis_name = setup.analysis_name;
+    %     permutation_folder = aux.permutation_folder;
+    %     hyperopt_folder = aux.hyperopt_folder;
+    %     bootstrap_folder = aux.boostrap_folder;
+    %     n_LV = aux.n_LV;
+    %     count_ns = aux.count_ns;
+    %     matrices_ana = aux.matrices_ana;
+    %     matrices_val = aux.matrices_val;
 
 end
 
@@ -173,17 +173,17 @@ IN.OB = OB; IN.IB = IB; IN.OF = W; IN.IF = K;
 
 if ~isfield(input, 'CV')
     output.CV = dp_setup_framework(IN);
-else 
-    output.CV = input.CV; 
+else
+    output.CV = input.CV;
 end
 
 if input.save_CV
-    CV = output.CV; 
+    CV = output.CV;
     save(fullfile(analysis_folder, 'CVstruct.mat'), 'CV');
     clear CV;
 end
 %save permutation setup files; CV:this causes a bug if max_sim_jobs = 1
-% 
+%
 if setup.max_sim_jobs > 1
     temp_pc = repelem(1:W, ceil(setup.num_jobs_perm/W)); %repelem(1:W, ceil(setup.max_sim_jobs/W));
     temp_pc(randi(setup.num_jobs_perm,1,size(temp_pc,2)-setup.num_jobs_perm))=[]; % temp_pc(randi(setup.max_sim_jobs,1,size(temp_pc,2)-setup.max_sim_jobs))=[];
@@ -208,7 +208,7 @@ end
 boot_sets = (input.bootstrap_testing - rest_boot)/size_sets_bootstrap;
 
 % if isfield(input, 'procrustes_flag')
-procrustes_flag = input.procrustes_flag; 
+procrustes_flag = input.procrustes_flag;
 % else
 %     procrustes_flag = true;
 % end
@@ -239,10 +239,10 @@ end
 
 % CV 04.08.2024: should previous mbspls analysis be continued? In this case, input,
 % output, preliminary results should be loaded instead of datafile; or what
-% other fields do we need? What other fields change in loop? 
+% other fields do we need? What other fields change in loop?
 % count_ns, matrices_ana, matrices_val
 if count_ns > 0
-    
+
     if ~islogical(input.validation_set)
 
 
@@ -252,14 +252,14 @@ if count_ns > 0
     end
 end
 
-success_LV = true; 
+success_LV = true;
 
 while count_ns<input.coun_ts_limit && success_LV && (input.max_n_LVs == -1 || n_LV < input.max_n_LVs) % if max_n_LV = -1, no maximum set
     % repeats the entire process W times to obtain W different final p values,
     % which go into the omnibus hypothesis
 
-    tic % track time elapsed for one LV 
-    
+    tic % track time elapsed for one LV
+
     % matrix to store the optimal parameters of the w-th loop
     output.opt_parameters.(['LV_', num2str(n_LV)]) = num2cell(nan(W,numel(output.parameters_names)));
 
@@ -286,15 +286,15 @@ while count_ns<input.coun_ts_limit && success_LV && (input.max_n_LVs == -1 || n_
             size_sets_hyperopt=1;
         end
 
-        
+
         [weights_combination, hyperopt_sets] = cv_weights_ext(input.optimization_strategy, matrices_ana, search_params, size_sets_hyperopt);
-        
+
         if strcmp(input.optimization_strategy, 'randomized_search')
-            input.randomized_search_params.weights_combination = weights_combination; 
+            input.randomized_search_params.weights_combination = weights_combination;
         end
-%         if strcmp(setup.cluster, 'sequential')
-%             hyperopt_sets = 1; 
-%         end
+        %         if strcmp(setup.cluster, 'sequential')
+        %             hyperopt_sets = 1;
+        %         end
         weights_ICV_collection = cell(size(weights_combination,1),1);
 
     end
@@ -663,7 +663,7 @@ while count_ns<input.coun_ts_limit && success_LV && (input.max_n_LVs == -1 || n_
                         [RHO_opt_collection(1,nn), weights_opt_collection(:,nn), Vs_opt_collection_temp, lVs_opt_temp, success_LV] = cv_mbspls_wrapper(OUT_matrices.train, OUT_matrices.test, c_weights_opt, correlation_method, matrix_norm);
                         Vs_opt_collection = cat(3, Vs_opt_collection, Vs_opt_collection_temp);
 
-                        
+
                         if weights_log
                             if input.framework == 3
                                 ratio = size(output.CV.cv_outer_indices.TestInd{1,w},1)/size(cat(1,output.CV.cv_outer_indices.TestInd{1,:}),1);
@@ -813,7 +813,7 @@ while count_ns<input.coun_ts_limit && success_LV && (input.max_n_LVs == -1 || n_
                     %log_min_sparsity = arrayfun(computeMean, [temp{:,opt_weights}])==min(arrayfun(computeMean, [temp{:,opt_weights}]));
                     %temp = temp(log_min_sparsity,:);
                     %if sum(log_min_sparsity)>1  % then take first one as all are same model / same sparsities
-                        temp = temp(1,:);
+                    temp = temp(1,:);
                     %end
                 end
             end
@@ -873,16 +873,68 @@ while count_ns<input.coun_ts_limit && success_LV && (input.max_n_LVs == -1 || n_
     % merge the folds according to the previous selection
     switch input.final_merge.type
         case 'mean'
-            for i=1:size(temp,2)
-                try output.final_parameters{n_LV,i}=mean([temp{:,i}],2);
-                catch
-                    temp_cat = [];
-                    for ii=1:size(temp,1)
-                        temp_cat=cat(1, temp_cat, temp{ii,i});
-                    end
-                    output.final_parameters{n_LV,i}=temp_cat;
-                end
+            % for i=1:size(temp,2)
+            %     try output.final_parameters{n_LV,i}=mean([temp{:,i}],2);
+            %     catch
+            %         temp_cat = [];
+            %         for ii=1:size(temp,1)
+            %             temp_cat=cat(1, temp_cat, temp{ii,i});
+            %         end
+            %         %output.final_parameters{n_LV,i}=temp_cat;
+            % 
+            %         % Get the size of temp_cat
+            %         [numRows, numCols] = size(temp_cat);
+            % 
+            %         % Initialize a cell array to store mean vectors
+            %         mean_vectors = cell(1, numCols);
+            % 
+            %         % Iterate over columns
+            %         for col = 1:numCols
+            %             % Extract the column data
+            %             col_data = temp_cat(:, col);
+            % 
+            %             % Concatenate data vertically
+            %             concatenated_data = cat(2, col_data{:});
+            % 
+            %             % Compute mean along rows
+            %             mean_vectors{col} = mean(concatenated_data, 2);
+            %         end
+            % 
+            %         output.final_parameters{n_LV,i}=mean_vectors;
+            %     end
+            % end
+            output.final_parameters{n_LV,1} = 1;
+            output.final_parameters{n_LV,2} = mean([temp{:,2}],2);
+            temp_cat = [];
+            for ii=1:size(temp,1)
+                temp_cat=cat(1, temp_cat, temp{ii,3});
             end
+            %output.final_parameters{n_LV,i}=temp_cat;
+
+            % Get the size of temp_cat
+            [numRows, numCols] = size(temp_cat);
+
+            % Initialize a cell array to store mean vectors
+            mean_vectors = cell(1, numCols);
+
+            % Iterate over columns
+            for col = 1:numCols
+                % Extract the column data
+                col_data = temp_cat(:, col);
+
+                % Concatenate data vertically
+                concatenated_data = cat(2, col_data{:});
+
+                % Compute mean along rows
+                mean_vectors{col} = mean(concatenated_data, 2);
+            end
+            output.final_parameters{n_LV,3} = mean_vectors;
+            output.final_parameters{n_LV,4} = 1;
+            output.final_parameters{n_LV,5} = mean([temp{:,5}],2);
+            output.final_parameters{n_LV,6} = min([temp{:,6}],2);
+            output.final_parameters{n_LV,7} = temp{:,7};
+            output.final_parameters{n_LV,8} = temp{:,8};
+
         case 'median'
             for i=1:size(temp,2)
                 try output.final_parameters{n_LV,i}=median([temp{:,i}],2);
@@ -1047,7 +1099,7 @@ while count_ns<input.coun_ts_limit && success_LV && (input.max_n_LVs == -1 || n_
                 lv_name = ['LV_', num2str(n_LV)];
 
                 % CV 20.08.2024: check bootstrap stability (delete later)
-               % save([detailed_results '/bootstrap_results_' lv_name '.mat'], 'RHO_boot', 'weights_boot', 'c_weights_opt');
+                % save([detailed_results '/bootstrap_results_' lv_name '.mat'], 'RHO_boot', 'weights_boot', 'c_weights_opt');
 
                 % Optimizsation criterion
                 RHO_analysis = lv_opt_params{pp, matches(output.opt_parameters_names, 'RHO')};
@@ -1091,7 +1143,7 @@ while count_ns<input.coun_ts_limit && success_LV && (input.max_n_LVs == -1 || n_
 
                 end
 
-          end
+            end
 
     end
     %% check if LV is significant and apply it to validation set (if applicable)
@@ -1142,8 +1194,8 @@ while count_ns<input.coun_ts_limit && success_LV && (input.max_n_LVs == -1 || n_
 
                 selection_train=input.selection_train; %1
 
-               % save([permutation_folder '/permutation_setup.mat'],'selection_train', 'mbspls_params','correlation_method', 'matrix_norm', 'size_sets_permutation', 'perm_coding', 'correction_target', 'procrustes_flag', '-v7.3');
-               % save([bootstrap_folder '/bootstrap_setup.mat'],'selection_train', 'mbspls_params','correlation_method', 'matrix_norm', 'size_sets_bootstrap', 'selection_retrain', 'correction_target', 'bs_method', 'procrustes_flag', '-v7.3');
+                % save([permutation_folder '/permutation_setup.mat'],'selection_train', 'mbspls_params','correlation_method', 'matrix_norm', 'size_sets_permutation', 'perm_coding', 'correction_target', 'procrustes_flag', '-v7.3');
+                % save([bootstrap_folder '/bootstrap_setup.mat'],'selection_train', 'mbspls_params','correlation_method', 'matrix_norm', 'size_sets_bootstrap', 'selection_retrain', 'correction_target', 'bs_method', 'procrustes_flag', '-v7.3');
 
                 save([permutation_folder '/permutation_partition_fold.mat'],...
                     'train_data_matrices', 'test_data_matrices', 'train_covariates', 'test_covariates',...
@@ -1207,7 +1259,7 @@ while count_ns<input.coun_ts_limit && success_LV && (input.max_n_LVs == -1 || n_
             weights{num_m} = output.validation_results{n_LV,opt_weights{num_m}}; % weight vector for matrix num_m
             [matrices_val{num_m}] = cv_proj_def_single(matrices_val{num_m}, weights{num_m});
         end
-        
+
     else
         for num_m=1:num_matrices
             weights{num_m} = output.final_parameters{n_LV,opt_weights}; % weight vector for matrix num_m
@@ -1218,12 +1270,12 @@ while count_ns<input.coun_ts_limit && success_LV && (input.max_n_LVs == -1 || n_
 
     disp('checkpoint deflation');
     toc
-    
+
     n_LV = n_LV+1;
-   
+
     if isfield(setup, 'saveall') && setup.saveall
         save([final_results, '/preliminary_result.mat']);
-    else 
+    else
         save([final_results, '/preliminary_result.mat'], 'input', 'output', 'setup');
     end
 
