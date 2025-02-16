@@ -933,80 +933,167 @@ while count_ns<input.coun_ts_limit && success_LV && (input.max_n_LVs == -1 || n_
 
     output.final_parameters{n_LV,opt_p} = p_LV;
 
-    %% Bootstrapping for chosen LV weight vectors
-    w_opt = output.final_parameters{n_LV,matches(output.parameters_names, 'w')}; %CV: what is w
+    switch input.final_merge.type
+        case 'best'
+            %% Bootstrapping for chosen LV weight vectors
+            w_opt = output.final_parameters{n_LV,matches(output.parameters_names, 'w')}; %CV: what is w
 
-    for num_m=1:size(input.Xs,2)
-        train_covariates{num_m} = Covars_ana{num_m}(output.CV.cv_outer_indices.TrainInd{ob,w_opt},:);
-%         train_data_matrices{num_m} = matrices_ana{num_m}(output.CV.cv_outer_indices.TrainInd{ob,w_opt},:);
+            for num_m=1:size(input.Xs,2)
+                train_covariates{num_m} = Covars_ana{num_m}(output.CV.cv_outer_indices.TrainInd{ob,w_opt},:);
+                %         train_data_matrices{num_m} = matrices_ana{num_m}(output.CV.cv_outer_indices.TrainInd{ob,w_opt},:);
+            end
+            train_DiagNames = DiagNames_ana(output.CV.cv_outer_indices.TrainInd{ob,w_opt},:);
+
+            c_weights_opt = output.final_parameters{n_LV,matches(output.parameters_names, 'c_weights')};
+            Vs_opt = output.final_parameters{n_LV,matches(output.parameters_names, 'Vs_opt')};
+
+            save([bootstrap_folder '/bootstrap_opt.mat'], 'c_weights_opt','Vs_opt','-v7.3');
+
+            wrapper_train_opt = @(x) get_split_matrix(x, output.CV.cv_outer_indices.TrainInd{ob,w_opt}) ;
+            train_data_matrices = cellfun(wrapper_train_opt, matrices_ana, UniformOutput=false);
+
+
+            % save the optimized parameters and the permutation matrix
+            save([bootstrap_folder '/bootstrap_partition_fold.mat'],...
+                'train_data_matrices', 'train_covariates', 'train_DiagNames', 'cs_method', '-v7.3');
+
+
+
+
+            [RHO_boot, weights_boot] = cv_mbspls_ICV_main_job_mult(bootstrap_folder, 'bootstrap', boot_sets, setup, num_matrices);
+
+
+
+            lv_name = ['LV_', num2str(n_LV)];
+
+            % CV 20.08.2024: check bootstrap stability (delete later)
+            save([detailed_results '/bootstrap_results_' lv_name '.mat'], 'RHO_boot', 'weights_boot', 'c_weights_opt');
+
+            % Optimizsation criterion
+            RHO_analysis = output.final_parameters{n_LV, matches(output.opt_parameters_names, 'RHO')};
+            RHO_mean = mean(RHO_boot);
+            RHO_SE = std(RHO_boot)/(sqrt(input.bootstrap_testing));
+            ci_RHO = [RHO_mean - 1.96 * RHO_SE, RHO_mean + 1.96 * RHO_SE];
+            bs_ratio_RHO = RHO_analysis/RHO_SE;
+            output.bootstrap_results.(lv_name).ci_RHO = ci_RHO;
+            output.bootstrap_results.(lv_name).bs_ratio_RHO = bs_ratio_RHO;
+            output.bootstrap_results.(lv_name).RHO_boot_size = size(RHO_boot);
+
+
+
+
+            % weights
+            for num_m=1:num_matrices
+                weights_analysis{num_m} = output.final_parameters{n_LV, matches(output.opt_parameters_names, 'weights')}{num_m};
+
+                weights_mean{num_m} = mean(weights_boot{num_m},2);
+                weights_SE{num_m} = std(weights_boot{num_m},0,2)/(sqrt(input.bootstrap_testing));
+
+                bs_ratio_weights{num_m} = weights_analysis{num_m}./weights_SE{num_m};
+                bs_ratio_weights{num_m}(isnan(bs_ratio_weights{num_m})) = 0;
+                bs_ratio_weights{num_m}(bs_ratio_weights{num_m} == Inf) = 0;
+                bs_ratio_weights{num_m}(bs_ratio_weights{num_m} == -Inf) = 0; % CV added; correct?
+                log_bs_weights{num_m} = abs(bs_ratio_weights{num_m})<=1.96;
+
+                ci_weights{num_m} = [weights_mean{num_m} - 1.96 * weights_SE{num_m}, weights_mean{num_m} + 1.96 * weights_SE{num_m}];
+                log_ci_weights{num_m} = ((sum(ci_weights{num_m}>0, 2) == 2) + (sum(ci_weights{num_m}<0, 2) == 2)) == 0;
+
+                output.bootstrap_results.(lv_name).ci_weights{num_m} = ci_weights{num_m};
+                output.bootstrap_results.(lv_name).bs_ratio_weights{num_m} = bs_ratio_weights{num_m};
+                output.bootstrap_results.(lv_name).weights_boot_size{num_m} = size(weights_boot{num_m});
+                output.bootstrap_results.(lv_name).log_bs_weights{num_m} = log_bs_weights{num_m};
+                output.bootstrap_results.(lv_name).sum_bs_weights{num_m} = sum(log_bs_weights{num_m});
+                output.bootstrap_results.(lv_name).log_ci_weights{num_m} = log_ci_weights{num_m};
+                output.bootstrap_results.(lv_name).sum_ci_weights{num_m} = sum(log_ci_weights{num_m});
+
+            end
+        case 'mean'
+            lv_name = ['LV_', num2str(n_LV)];
+            output.bootstrap_results.(lv_name).ci_RHO = [];
+            output.bootstrap_results.(lv_name).bs_ratio_RHO = [];
+            output.bootstrap_results.(lv_name).RHO_boot_size = [];
+            % do bootstrapping for each optimal model and merge afterwards
+            for pp=1:size(output.opt_parameters.(['LV_', num2str(n_LV)]),1)
+                lv_opt_params = output.opt_parameters.(['LV_',num2str(n_LV)]);
+                %% Bootstrapping for chosen LV weight vectors
+                w_opt = lv_opt_params{pp,matches(output.opt_parameters_names, 'w')}; %CV: what is w
+
+                for num_m=1:size(input.Xs,2)
+                    train_covariates{num_m} = Covars_ana{num_m}(output.CV.cv_outer_indices.TrainInd{ob,w_opt},:);
+                    %         train_data_matrices{num_m} = matrices_ana{num_m}(output.CV.cv_outer_indices.TrainInd{ob,w_opt},:);
+                end
+                train_DiagNames = DiagNames_ana(output.CV.cv_outer_indices.TrainInd{ob,w_opt},:);
+
+                c_weights_opt = lv_opt_params{pp,matches(output.parameters_names, 'c_weights')};
+                Vs_opt = lv_opt_params{pp,matches(output.parameters_names, 'Vs_opt')};
+
+                save([bootstrap_folder '/bootstrap_opt.mat'], 'c_weights_opt','Vs_opt','-v7.3');
+
+                wrapper_train_opt = @(x) get_split_matrix(x, output.CV.cv_outer_indices.TrainInd{ob,w_opt}) ;
+                train_data_matrices = cellfun(wrapper_train_opt, matrices_ana, UniformOutput=false);
+
+
+                % save the optimized parameters and the permutation matrix
+                save([bootstrap_folder '/bootstrap_partition_fold.mat'],...
+                    'train_data_matrices', 'train_covariates', 'train_DiagNames', 'cs_method', '-v7.3');
+
+
+
+
+                [RHO_boot, weights_boot] = cv_mbspls_ICV_main_job_mult(bootstrap_folder, 'bootstrap', boot_sets, setup, num_matrices);
+
+
+
+                lv_name = ['LV_', num2str(n_LV)];
+
+                % CV 20.08.2024: check bootstrap stability (delete later)
+               % save([detailed_results '/bootstrap_results_' lv_name '.mat'], 'RHO_boot', 'weights_boot', 'c_weights_opt');
+
+                % Optimizsation criterion
+                RHO_analysis = lv_opt_params{pp, matches(output.opt_parameters_names, 'RHO')};
+                RHO_mean = mean(RHO_boot);
+                RHO_SE = std(RHO_boot)/(sqrt(input.bootstrap_testing));
+                ci_RHO = [RHO_mean - 1.96 * RHO_SE, RHO_mean + 1.96 * RHO_SE];
+                bs_ratio_RHO = RHO_analysis/RHO_SE;
+
+
+
+                output.bootstrap_results.(lv_name).ci_RHO = [output.bootstrap_results.(lv_name).ci_RHO, ci_RHO];
+                output.bootstrap_results.(lv_name).bs_ratio_RHO = [output.bootstrap_results.(lv_name).bs_ratio_RHO, bs_ratio_RHO];
+                output.bootstrap_results.(lv_name).RHO_boot_size = [output.bootstrap_results.(lv_name).RHO_boot_size, size(RHO_boot)];
+
+
+
+
+                % weights
+                for num_m=1:num_matrices
+                    weights_analysis{num_m} = lv_opt_params{pp, matches(output.opt_parameters_names, 'weights')}{num_m};
+
+                    weights_mean{num_m} = mean(weights_boot{num_m},2);
+                    weights_SE{num_m} = std(weights_boot{num_m},0,2)/(sqrt(input.bootstrap_testing));
+
+                    bs_ratio_weights{num_m} = weights_analysis{num_m}./weights_SE{num_m};
+                    bs_ratio_weights{num_m}(isnan(bs_ratio_weights{num_m})) = 0;
+                    bs_ratio_weights{num_m}(bs_ratio_weights{num_m} == Inf) = 0;
+                    bs_ratio_weights{num_m}(bs_ratio_weights{num_m} == -Inf) = 0; % CV added; correct?
+                    log_bs_weights{num_m} = abs(bs_ratio_weights{num_m})<=1.96;
+
+                    ci_weights{num_m} = [weights_mean{num_m} - 1.96 * weights_SE{num_m}, weights_mean{num_m} + 1.96 * weights_SE{num_m}];
+                    log_ci_weights{num_m} = ((sum(ci_weights{num_m}>0, 2) == 2) + (sum(ci_weights{num_m}<0, 2) == 2)) == 0;
+
+                    output.bootstrap_results.(lv_name).ci_weights{num_m, pp} = ci_weights{num_m};
+                    output.bootstrap_results.(lv_name).bs_ratio_weights{num_m, pp} = bs_ratio_weights{num_m};
+                    output.bootstrap_results.(lv_name).weights_boot_size{num_m, pp} = size(weights_boot{num_m});
+                    output.bootstrap_results.(lv_name).log_bs_weights{num_m, pp} = log_bs_weights{num_m};
+                    output.bootstrap_results.(lv_name).sum_bs_weights{num_m, pp} = sum(log_bs_weights{num_m});
+                    output.bootstrap_results.(lv_name).log_ci_weights{num_m, pp} = log_ci_weights{num_m};
+                    output.bootstrap_results.(lv_name).sum_ci_weights{num_m, pp} = sum(log_ci_weights{num_m});
+
+                end
+
+          end
+
     end
-    train_DiagNames = DiagNames_ana(output.CV.cv_outer_indices.TrainInd{ob,w_opt},:);
-
-    c_weights_opt = output.final_parameters{n_LV,matches(output.parameters_names, 'c_weights')};
-    Vs_opt = output.final_parameters{n_LV,matches(output.parameters_names, 'Vs_opt')};
-
-    save([bootstrap_folder '/bootstrap_opt.mat'], 'c_weights_opt','Vs_opt','-v7.3');
-
-    wrapper_train_opt = @(x) get_split_matrix(x, output.CV.cv_outer_indices.TrainInd{ob,w_opt}) ;
-    train_data_matrices = cellfun(wrapper_train_opt, matrices_ana, UniformOutput=false);
-
-
-    % save the optimized parameters and the permutation matrix
-    save([bootstrap_folder '/bootstrap_partition_fold.mat'],...
-        'train_data_matrices', 'train_covariates', 'train_DiagNames', 'cs_method', '-v7.3');
-
-
-
-
-    [RHO_boot, weights_boot] = cv_mbspls_ICV_main_job_mult(bootstrap_folder, 'bootstrap', boot_sets, setup, num_matrices);
-
-
-
-    lv_name = ['LV_', num2str(n_LV)];
-    
-    % CV 20.08.2024: check bootstrap stability (delete later)
-    save([detailed_results '/bootstrap_results_' lv_name '.mat'], 'RHO_boot', 'weights_boot', 'c_weights_opt');
-
-    % Optimizsation criterion
-    RHO_analysis = output.final_parameters{n_LV, matches(output.opt_parameters_names, 'RHO')};
-    RHO_mean = mean(RHO_boot);
-    RHO_SE = std(RHO_boot)/(sqrt(input.bootstrap_testing));
-    ci_RHO = [RHO_mean - 1.96 * RHO_SE, RHO_mean + 1.96 * RHO_SE];
-    bs_ratio_RHO = RHO_analysis/RHO_SE;
-    output.bootstrap_results.(lv_name).ci_RHO = ci_RHO;
-    output.bootstrap_results.(lv_name).bs_ratio_RHO = bs_ratio_RHO;
-    output.bootstrap_results.(lv_name).RHO_boot_size = size(RHO_boot);
-
-
-
-
-
-    % weights
-    for num_m=1:num_matrices
-        weights_analysis{num_m} = output.final_parameters{n_LV, matches(output.opt_parameters_names, 'weights')}{num_m};
-
-        weights_mean{num_m} = mean(weights_boot{num_m},2); 
-        weights_SE{num_m} = std(weights_boot{num_m},0,2)/(sqrt(input.bootstrap_testing)); 
-
-        bs_ratio_weights{num_m} = weights_analysis{num_m}./weights_SE{num_m};
-        bs_ratio_weights{num_m}(isnan(bs_ratio_weights{num_m})) = 0;
-        bs_ratio_weights{num_m}(bs_ratio_weights{num_m} == Inf) = 0;
-        bs_ratio_weights{num_m}(bs_ratio_weights{num_m} == -Inf) = 0; % CV added; correct?
-        log_bs_weights{num_m} = abs(bs_ratio_weights{num_m})<=1.96;
-
-        ci_weights{num_m} = [weights_mean{num_m} - 1.96 * weights_SE{num_m}, weights_mean{num_m} + 1.96 * weights_SE{num_m}];
-        log_ci_weights{num_m} = ((sum(ci_weights{num_m}>0, 2) == 2) + (sum(ci_weights{num_m}<0, 2) == 2)) == 0;
-
-        output.bootstrap_results.(lv_name).ci_weights{num_m} = ci_weights{num_m};
-        output.bootstrap_results.(lv_name).bs_ratio_weights{num_m} = bs_ratio_weights{num_m};
-        output.bootstrap_results.(lv_name).weights_boot_size{num_m} = size(weights_boot{num_m});
-        output.bootstrap_results.(lv_name).log_bs_weights{num_m} = log_bs_weights{num_m};
-        output.bootstrap_results.(lv_name).sum_bs_weights{num_m} = sum(log_bs_weights{num_m});
-        output.bootstrap_results.(lv_name).log_ci_weights{num_m} = log_ci_weights{num_m};
-        output.bootstrap_results.(lv_name).sum_ci_weights{num_m} = sum(log_ci_weights{num_m});
-
-    end
-
     %% check if LV is significant and apply it to validation set (if applicable)
 
     if ~islogical(input.validation_set)
