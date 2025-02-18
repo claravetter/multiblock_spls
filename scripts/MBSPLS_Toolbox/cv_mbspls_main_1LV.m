@@ -65,6 +65,8 @@ output.opt_parameters_names = output.parameters_names;
 % LV can be stored in separate rows
 if ~isfield(input, 'n_LV')
     input.n_LV = 1;
+else
+    input.n_LV = input.n_LV+1;
 end
 n_LV = input.n_LV;
 
@@ -1049,7 +1051,7 @@ end
 % disp('checkpoint deflation');
 % toc
 %
-input.n_LV = input.n_LV+1;
+%input.n_LV = input.n_LV+1;
 
 preliminary_results_mean_file = [final_results, '/preliminary_result_LV' num2str(n_LV) '.mat']; 
 save(preliminary_results_mean_file, 'input', 'output', 'setup');
