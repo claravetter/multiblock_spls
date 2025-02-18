@@ -1,6 +1,6 @@
-function cv_mbspls_outer_mean_deflate(analysisfolder)
+function datafile = cv_mbspls_outer_mean_deflate(resultfile, analysisfolder)
 
-resultfile = [analysisfolder, 'final_results/preliminary_result_mean_boot.mat'];
+%resultfile = [analysisfolder, 'preliminary_result_mean.mat'];
 load(resultfile)
 
 %% deflation
@@ -16,7 +16,7 @@ input.covariates{1,6} = [];
 input.covariates_names{1,4} = [];
 input.covariates_names{1,6} = [];
 %%
-datafile = [analysisfolder, 'final_results/preliminary_result_mean.mat'];
+datafile = [analysisfolder, 'preliminary_result_mean_LV' num2str(input.n_LV), '.mat'];
 input.datafile = datafile; 
 input.CV = output.CV; 
 input.save_CV = 0;

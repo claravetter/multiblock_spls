@@ -3,7 +3,7 @@ function preliminary_result_mean_average = cv_mbspls_outer_mean_average(resultfi
 %resultfile = [analysisfolder, 'final_results/preliminary_result.mat'];
 load(resultfile)
 %%
-lv_name = ['LV_' num2str(input.n_LV)];
+lv_name = ['LV_' num2str(inp)]
 temp = output.opt_parameters.(lv_name);
 temp_cat = [];
 for ii=1:size(temp,1)

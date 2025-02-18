@@ -1,5 +1,5 @@
 %% DP SPLS standalone function
-function [preliminary_results_mean_file, analysis_folder] = cv_mbspls_main_1LV(datafile)
+function cv_mbspls_main_1LV(datafile)
 
 %% initialize analysis folders
 % load the datafile that contains the data and the analysis information
@@ -64,9 +64,8 @@ output.opt_parameters_names = output.parameters_names;
 % n_LV counts the iteration through the LV loops, so that the results for each
 % LV can be stored in separate rows
 if ~isfield(input, 'n_LV')
-    input.n_LV = 1;
+    n_LV = 1;
 end
-n_LV = input.n_LV;
 
 % check if a validation set is set up => extract it before starting the
 % analysis
@@ -1051,8 +1050,7 @@ end
 %
 input.n_LV = input.n_LV+1;
 
-preliminary_results_mean_file = [final_results, '/preliminary_result_LV' num2str(n_LV) '.mat']; 
-save(preliminary_results_mean_file, 'input', 'output', 'setup');
+save([final_results, '/preliminary_result.mat'], 'input', 'output', 'setup');
 
 
 %end
@@ -1062,6 +1060,10 @@ save(preliminary_results_mean_file, 'input', 'output', 'setup');
 
 %save([final_results, '/result.mat'], 'input', 'output', 'setup');
 %delete([final_results, '/preliminary_result.mat']);
+
+rmdir(hyperopt_folder, 's');
+rmdir(permutation_folder,'s');
+rmdir(bootstrap_folder,'s');
 
 cd(setup.analysis_folder)
 end

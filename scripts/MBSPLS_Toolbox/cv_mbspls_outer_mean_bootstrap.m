@@ -1,6 +1,6 @@
-function cv_mbspls_outer_mean_bootstrap(analysisfolder, n_LV)
+function cv_mbspls_outer_mean_bootstrap(resultfile, analysisfolder)
 
-resultfile = [analysisfolder, 'final_results/preliminary_result_mean.mat'];
+%resultfile = [analysisfolder, 'preliminary_result_mean.mat'];
 load(resultfile)
 
 [~, ~, matrices,  ~, ~, ~, ~, ~, ~, size_sets_bootstrap, correlation_method, cs_method, selection_train, selection_retrain, correction_target, matrix_norm, search_params, mbspls_params] = cv_mbspls_setup_parameters(input, setup);
@@ -66,7 +66,7 @@ for num_m= 1:size(input.Xs,2)
     end
 end
 
-if n_LV>input.correct_limit
+if input.n_LV>input.correct_limit
     input.corrected_log(n_LV) = false;
 elseif strcmp(input.type_correction, 'uncorrected')
     input.corrected_log(n_LV) = false;
@@ -161,7 +161,7 @@ for ob=1:OB
 
 end
 
-datafile = [analysisfolder, 'final_results/preliminary_result_mean.mat'];
+datafile = [analysisfolder, 'preliminary_result_mean.mat'];
 save(datafile, 'input', 'setup', 'output')
 
 end
