@@ -873,36 +873,36 @@ while count_ns<input.coun_ts_limit && success_LV && (input.max_n_LVs == -1 || n_
     % merge the folds according to the previous selection
     switch input.final_merge.type
         case 'mean'
-            % for i=1:size(temp,2)
-            %     try output.final_parameters{n_LV,i}=mean([temp{:,i}],2);
-            %     catch
-            %         temp_cat = [];
-            %         for ii=1:size(temp,1)
-            %             temp_cat=cat(1, temp_cat, temp{ii,i});
-            %         end
-            %         %output.final_parameters{n_LV,i}=temp_cat;
-            % 
-            %         % Get the size of temp_cat
-            %         [numRows, numCols] = size(temp_cat);
-            % 
-            %         % Initialize a cell array to store mean vectors
-            %         mean_vectors = cell(1, numCols);
-            % 
-            %         % Iterate over columns
-            %         for col = 1:numCols
-            %             % Extract the column data
-            %             col_data = temp_cat(:, col);
-            % 
-            %             % Concatenate data vertically
-            %             concatenated_data = cat(2, col_data{:});
-            % 
-            %             % Compute mean along rows
-            %             mean_vectors{col} = mean(concatenated_data, 2);
-            %         end
-            % 
-            %         output.final_parameters{n_LV,i}=mean_vectors;
-            %     end
-            % end
+            for i=1:size(temp,2)
+                try output.final_parameters{n_LV,i}=mean([temp{:,i}],2);
+                catch
+                    temp_cat = [];
+                    for ii=1:size(temp,1)
+                        temp_cat=cat(1, temp_cat, temp{ii,i});
+                    end
+                    %output.final_parameters{n_LV,i}=temp_cat;
+
+                    % Get the size of temp_cat
+                    [numRows, numCols] = size(temp_cat);
+
+                    % Initialize a cell array to store mean vectors
+                    mean_vectors = cell(1, numCols);
+
+                    % Iterate over columns
+                    for col = 1:numCols
+                        % Extract the column data
+                        col_data = temp_cat(:, col);
+
+                        % Concatenate data vertically
+                        concatenated_data = cat(2, col_data{:});
+
+                        % Compute mean along rows
+                        mean_vectors{col} = mean(concatenated_data, 2);
+                    end
+
+                    output.final_parameters{n_LV,i}=mean_vectors;
+                end
+            end
             output.final_parameters{n_LV,1} = 1;
             output.final_parameters{n_LV,2} = mean([temp{:,2}],2);
             temp_cat = [];
