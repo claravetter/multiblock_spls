@@ -1,0 +1,116 @@
+%% function for permutation testing
+
+function cv_mbspls_mean_ICV_permutation_csv(i, analysis_folder)
+
+m_setup = matfile([analysis_folder '/permutation_setup.mat']);
+
+if m_setup.selection_train == 1
+    m_data = matfile([analysis_folder, '/permutation_partition_fold.mat']);
+    m_opt = matfile([analysis_folder '/permutation_opt.mat']);
+elseif m_setup.selection_train == 2
+    w = m_setup.perm_coding(2, (find(m_setup.perm_coding(1,:)==str2double(i))));
+    m_data = matfile([analysis_folder, '/permutation_partition_fold_', num2str(w), '.mat']);
+    m_opt = matfile([analysis_folder '/permutation_opt.mat']); 
+end
+
+
+IN_matrices.train = m_data.train_data_matrices;
+IN_matrices.test = m_data.test_data_matrices;
+
+train_covariates = m_data.train_covariates; 
+test_covariates = m_data.test_covariates; 
+for num_m=1:size(IN_matrices.train,2)
+    COV{num_m}.train = train_covariates{num_m};
+    COV{num_m}.test = test_covariates{num_m};
+end
+
+cs_method_permutation = m_data.cs_method;
+
+
+% permute all matrices
+for num_m=1:length(IN_matrices.train)
+    for pp=1:str2double(i)
+        permmat = nk_PermInd(m_setup.size_sets_permutation, m_data.train_Diag); 
+    end
+    permmats{num_m} = permmat; 
+end
+clear permmat
+
+RHO_collection_ICV_mean = nan(m_setup.size_sets_permutation,1);
+
+for ii=1:m_setup.size_sets_permutation
+    RHO_collection_ICV = nan(W,1);
+    for ob=1:OB
+    for w=1:W
+
+        for num_m=1:num_matrices
+                    test_covariates{num_m} = Covars_ana{num_m}(output.CV.cv_outer_indices.TestInd{ob,w},:);
+                    train_covariates{num_m} = Covars_ana{num_m}(output.CV.cv_outer_indices.TrainInd{ob,w},:);
+                end
+
+
+                wrapper_test = @(x) get_split_matrix(x, output.CV.cv_outer_indices.TestInd{ob,w}) ;
+                wrapper_train = @(x) get_split_matrix(x, output.CV.cv_outer_indices.TrainInd{ob,w}) ;
+                train_data_matrices = cellfun(wrapper_train, matrices_ana, UniformOutput=false);
+
+                test_data_matrices = cellfun(wrapper_test, matrices_ana, UniformOutput=false);
+
+                train_Diag = Diag_ana(output.CV.cv_outer_indices.TrainInd{ob,w},:);
+        for num_m=1:size(input.Xs,2)
+            COV{num_m} = Covars_ana{num_m}(output.CV.cv_outer_indices.TrainInd{ob,w_opt},:);
+            %train_data_matrices{num_m} = matrices_ana{num_m}(output.CV.cv_outer_indices.TrainInd{ob,w_opt},:);
+        end
+        
+        c_weights_opt = output.final_parameters{n_LV,matches(output.parameters_names, 'c_weights')};
+        Vs_opt = output.final_parameters{n_LV,matches(output.parameters_names, 'Vs_opt')};
+
+        save([bootstrap_folder '/bootstrap_opt.mat'], 'c_weights_opt','Vs_opt','-v7.3');
+
+        wrapper_train_opt = @(x) get_split_matrix(x, output.CV.cv_outer_indices.TrainInd{ob,w_opt}) ;
+        train_data_matrices = cellfun(wrapper_train_opt, matrices_ana, UniformOutput=false);
+
+        for num_m=1:length(IN_matrices.train)-1
+            IN_matrices.train{num_m+1} = train_data_matrices{num_m+1}(permmats{num_m}(ii,:),:);
+        end
+
+
+        [OUT_matrices] = cv_master_correctscale(IN_matrices, COV, cs_method_permutation, m_setup.correction_target);
+
+        if ~islogical(m_opt.Vs_opt) && m_setup.procrustes_flag
+            RHO_collection_ICV(w,1) = cv_mbspls_wrapper(OUT_matrices.train, ...
+                OUT_matrices.test, ...
+                m_opt.c_weights_opt, ...
+                m_setup.mbspls_params, ...
+                m_setup.correlation_method, ...
+                m_setup.matrix_norm, ...
+                m_opt.Vs_opt); % slim
+        else
+            RHO_collection_ICV(w,1) = cv_mbspls_wrapper(OUT_matrices.train, ...
+                OUT_matrices.test, ...
+                m_opt.c_weights_opt, ...
+                m_setup.mbspls_params, ...
+                m_setup.correlation_method, ...
+                m_setup.matrix_norm, ...
+                []); % slim
+        end
+
+    end
+    end
+    RHO_collection_ICV_mean(ii,1) = mean(RHO_collection_ICV);
+end
+
+writematrix(RHO_collection_ICV_mean,[analysis_folder, '/RHO_results_', num2str(i), '.csv'],'Delimiter','tab')
+RHO_collection = [];
+
+
+for i=1:total_jobs
+    path_file = [analysis_folder '/RHO_results_' num2str(i),'.csv'];
+    RHO_collection_temp = readmatrix(path_file);
+    RHO_collection = [RHO_collection; RHO_collection_temp];
+    delete(path_file);
+end
+
+RHO_ICV = RHO_collection;
+
+
+end
