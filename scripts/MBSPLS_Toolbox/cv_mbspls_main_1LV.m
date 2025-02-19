@@ -38,8 +38,8 @@ else
     permutation_folder = setup.permutation_folder;
     hyperopt_folder = setup.hyperopt_folder;
     bootstrap_folder = setup.bootstrap_folder;
-    detailed_results = setup.detailed_folder;
-    final_results = setup.final_folder;
+    detailed_results = setup.detailed_results;
+    final_results = setup.final_results;
 end
 
 
