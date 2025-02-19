@@ -27,6 +27,19 @@ if ~isfield(input, 'n_LV')
         end
     end
     [permutation_folder, hyperopt_folder, bootstrap_folder, detailed_results, final_results] = dp_create_folders(setup.scratch_space, analysis_folder, analysis_name);
+    setup.analysis_folder = analysis_folder;
+    setup.permutation_folder = permutation_folder;
+    setup.hyperopt_folder = hyperopt_folder;
+    setup.bootstrap_folder = bootstrap_folder;
+    setup.detailed_results = detailed_folder;
+    setup.final_results = final_folder;
+else
+    analysis_folder = setup.analysis_folder;
+    permutation_folder = setup.permutation_folder;
+    hyperopt_folder = setup.hyperopt_folder;
+    bootstrap_folder = setup.bootstrap_folder;
+    detailed_results = setup.detailed_folder;
+    final_results = setup.final_folder;
 end
 
 
