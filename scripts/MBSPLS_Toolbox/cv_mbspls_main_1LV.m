@@ -31,8 +31,8 @@ if ~isfield(input, 'n_LV')
     setup.permutation_folder = permutation_folder;
     setup.hyperopt_folder = hyperopt_folder;
     setup.bootstrap_folder = bootstrap_folder;
-    setup.detailed_results = detailed_folder;
-    setup.final_results = final_folder;
+    setup.detailed_results = detailed_results; 
+    setup.final_results = final_results;
 else
     analysis_folder = setup.analysis_folder;
     permutation_folder = setup.permutation_folder;
