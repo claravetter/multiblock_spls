@@ -16,8 +16,10 @@ while any_sig
     log_sig = [temp{:,matches(output.opt_parameters_names, 'p')}] <= output.pvalue_FDR(input.n_LV,1);
     if ~any(log_sig)
         any_sig = false; 
+        disp(['checkpoint: LV' input.n_LV ' not significant. Finished.'])
     else
     datafile = deflated_datafile; 
     end
+    disp(['checkpoint: LV' input.n_LV ' done'])
 end
 end

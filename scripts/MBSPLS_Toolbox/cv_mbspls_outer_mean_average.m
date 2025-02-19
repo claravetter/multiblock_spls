@@ -28,10 +28,9 @@ for col = 1:numCols
 end
 
 %%
-output.final_parameters{1, 3} = mean_vectors; 
-output.final_parameters{1,5} = mean([temp{:,5}],2);
+output.final_parameters{input.n_LV, 3} = mean_vectors; 
+output.final_parameters{input.n_LV,5} = mean([temp{:,5}],2);
 
-output.final_parameters = output.final_parameters(1,:);
 %%
 
 preliminary_result_mean_average = [analysisfolder '/preliminary_result_mean_LV' num2str(input.n_LV) '.mat'];
