@@ -20,6 +20,6 @@ while any_sig
     else
     datafile = deflated_datafile; 
     end
-    disp(['checkpoint: LV' input.n_LV ' done'])
+    disp(['checkpoint: LV' num2str(input.n_LV) ' done'])
 end
 end
