@@ -69,7 +69,7 @@ if isnumeric(DAT) % only operate on one dataset
     end
     
 elseif isstruct(DAT) % perform on train and apply to test dataset
-    if ~any(isnan(COV.test), 'all') && ~isempty(COV.test)
+    if ~any(isnan(COV.test), 'all') && ~isempty(COV.test) && any(range(COV.test) > 0)  
         % standardization of data and covariates
         [DAT.train_s, DAT.test_s] = dp_standardize_comb(DAT.train, DAT.test, IN_s);
         
@@ -79,12 +79,13 @@ elseif isstruct(DAT) % perform on train and apply to test dataset
        % end
         % correction of data
         switch MET.covars_correct_method
-            case "partial_correlations"
+            case {"partial_correlations", "partial-correlations"}
                 [COV.train_s, COV.test_s] = dp_standardize_comb(COV.train, COV.test, IN_s);
                 [DAT.train_sc, DAT.test_sc] = cv_partial_correlations_corrections(DAT.train_s, DAT.test_s, COV.train_s, COV.test_s, IN_s.subgroup_train, IN_s.subgroup_test);
             case "mean_offset"
                 [DAT.train_sc, DAT.test_sc] = cv_mean_offset_corrections(DAT.train_s, DAT.test_s, COV.train, COV.test);
             case "combat"
+                
         end
         % standardization of data
         [OUT.train, OUT.test] = dp_standardize_comb(DAT.train_sc, DAT.test_sc, IN_s);
