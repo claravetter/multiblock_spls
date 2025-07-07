@@ -13,6 +13,10 @@ function hyperparameterCombinations = cv_RandomizedSearch_GetHyperparamComb(hype
     % Generate random samples from the distributions for each hyperparameter
     for i = 1:numHyperparameters
         distribution = hyperparameterDistributions{i};
-        hyperparameterCombinations(:, i) = random(distribution, numCombinations, 1);
+        if isnumeric(distribution)
+            hyperparameterCombinations(:, i) = distribution; %fixed
+        else
+            hyperparameterCombinations(:, i) = random(distribution, numCombinations, 1);
+        end
     end
 end

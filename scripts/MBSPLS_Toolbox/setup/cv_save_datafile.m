@@ -57,6 +57,10 @@ end
 if isfield(input, 'procrustes_flag') && ~input.procrustes_flag
     input.name = [input.name, '_ProcrustesRotation'];
 end
+
+if isfield(input, 'project_name_ext')
+    input.name = [input.name, '_', input.project_name_ext];
+end
 input.datafile = fullfile(analysis_folder, [setup.date, '_', input.name, '_datafile.mat']); % Path for storing datafile containing input and setup
 
 mkdir(analysis_folder); % Creates analysis folder

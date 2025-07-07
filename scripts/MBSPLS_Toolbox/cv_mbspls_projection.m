@@ -5,9 +5,10 @@ for i=1:length(data)
     lVs(:,i) = data{i}*weights{i};
 end
 f_invert = @(x)(-1*x);
-% TO DO: user defined input what to use (also max pairwise correlation etc.
+% TO DO: user defined input what to use (also max pairwise correlation
+% etc.)
 
-if size(lVs,2) == 2 && matrix_norm == 0
+if size(lVs,2) == 2 && isnumeric(matrix_norm) && matrix_norm == 0
     RHO= corr(lVs(:, 1), lVs(:, 2), 'Type', correlation_method);
     if RHO<0 % if correlation negative, invert one weight vector --> correlation positive
         weights{2} = f_invert(weights{2});
