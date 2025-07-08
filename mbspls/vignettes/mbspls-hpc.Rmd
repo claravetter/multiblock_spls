@@ -1,0 +1,217 @@
+---
+title: "MBSPLS on High-Performance Computing Clusters"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{MBSPLS on High-Performance Computing Clusters}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+# Introduction
+
+This vignette demonstrates how to use the `mbspls` package on High-Performance Computing (HPC) clusters. The package leverages the `future` framework for parallelization, which provides a unified interface to various parallel backends, including SLURM, SGE, and other job schedulers.
+
+## Prerequisites
+
+To follow this vignette, you need the following packages:
+
+```{r setup, eval=FALSE}
+library(mbspls)
+library(future)
+library(future.batchtools)
+```
+
+# Running MBSPLS on a SLURM Cluster
+
+## Setting up the SLURM Template
+
+First, we need to create a SLURM template for `future.batchtools`. Create a file named `slurm.tmpl` in your project directory:
+
+```{bash, eval=FALSE}
+#!/bin/bash
+#SBATCH --job-name=<%= job.name %>
+#SBATCH --output=<%= log.file %>
+#SBATCH --error=<%= log.file %>
+#SBATCH --time=<%= resources$walltime %>
+#SBATCH --ntasks=1
+#SBATCH --cpus-per-task=<%= resources$ncpus %>
+#SBATCH --mem-per-cpu=<%= resources$memory %>
+<%= if (resources$partition != "") sprintf("#SBATCH --partition=%s", resources$partition) %>
+
+## Initialize work environment
+module load R/4.2.0
+cd <%= workdir %>
+
+## Export R_LIBS_USER to the same path used when registering the template
+export R_LIBS_USER=<%= resources$R_LIBS_USER %>
+
+## Run R CMD BATCH
+Rscript -e "source('<%= rscript %>')"
+```
+
+## Configuring the Future Backend
+
+Next, we configure the future backend to use SLURM:
+
+```{r future-slurm, eval=FALSE}
+# Set up the SLURM batchtools backend
+future::plan(future.batchtools::batchtools_slurm, 
+             template = "slurm.tmpl",
+             resources = list(
+               walltime = "12:00:00",
+               memory = "4GB",
+               ncpus = 4,
+               partition = "normal",
+               R_LIBS_USER = Sys.getenv("R_LIBS_USER")
+             ))
+```
+
+## Running MBSPLS Analysis
+
+With the backend configured, you can run your MBSPLS analysis as usual:
+
+```{r mbspls-run, eval=FALSE}
+# Load your data
+data <- read_matlab_input("path/to/your/data.mat")
+
+# Set up MBSPLS parameters
+params <- mbspls_setup(
+  sparsity = c(2, 2, 2),
+  num_components = 2,
+  convergence_threshold = 1e-5,
+  parallel_settings = list(
+    workers = 4,  # This will be overridden by the SLURM template
+    strategy = "cluster",
+    seed = 42
+  )
+)
+
+# Run the analysis - this will be distributed across SLURM jobs
+result <- mbspls_run(
+  data = data,
+  params = params,
+  cv_folds = 10,
+  n_permutations = 1000,
+  n_bootstraps = 500
+)
+
+# Save the results
+saveRDS(result, "mbspls_results.rds")
+```
+
+# Hyperparameter Optimization on HPC
+
+MBSPLS often requires tuning the sparsity parameters. Here's how to set up a grid search:
+
+```{r hyperopt, eval=FALSE}
+# Define a grid of sparsity parameters
+sparsity_grid <- list(
+  c(1, 1, 1),
+  c(2, 2, 2),
+  c(3, 3, 3),
+  c(4, 4, 4),
+  c(5, 5, 5)
+)
+
+# Function to evaluate one parameter set
+evaluate_params <- function(sparsity_values) {
+  params <- mbspls_setup(
+    sparsity = sparsity_values,
+    convergence_threshold = 1e-5
+  )
+  
+  result <- mbspls_run(
+    data = data,
+    params = params,
+    cv_folds = 5,
+    n_permutations = 0,
+    n_bootstraps = 0
+  )
+  
+  # Return cross-validation performance
+  return(result$cv_results$mean_rho)
+}
+
+# Run grid search in parallel
+grid_results <- future.apply::future_sapply(
+  sparsity_grid,
+  evaluate_params,
+  future.seed = TRUE
+)
+
+# Find the best parameters
+best_idx <- which.max(grid_results)
+best_sparsity <- sparsity_grid[[best_idx]]
+best_performance <- grid_results[best_idx]
+
+cat("Best sparsity parameters:", paste(best_sparsity, collapse = ", "),
+    "with performance:", best_performance, "\n")
+```
+
+# Managing Large Datasets
+
+When working with large datasets on HPC, memory management becomes crucial:
+
+```{r large-data, eval=FALSE}
+# For very large datasets, you can use memory mapping
+# Install the required package if not already installed
+if (!requireNamespace("bigmemory", quietly = TRUE)) {
+  install.packages("bigmemory")
+}
+
+# Create memory-mapped matrices
+library(bigmemory)
+
+# Assuming X1, X2, X3 are large matrices
+X1_big <- as.big.matrix(X1)
+X2_big <- as.big.matrix(X2)
+X3_big <- as.big.matrix(X3)
+
+# Create a wrapper function to convert big.matrix to regular matrix for each fold
+run_mbspls_with_bigmem <- function(data_indices, X1_big, X2_big, X3_big, params) {
+  # Extract the subset as regular matrices
+  X1_subset <- as.matrix(X1_big[data_indices, ])
+  X2_subset <- as.matrix(X2_big[data_indices, ])
+  X3_subset <- as.matrix(X3_big[data_indices, ])
+  
+  # Create the data object
+  data_subset <- mbs_data(
+    block1 = X1_subset,
+    block2 = X2_subset,
+    block3 = X3_subset
+  )
+  
+  # Run MBSPLS on the subset
+  result <- mbspls_run(
+    data = data_subset,
+    params = params,
+    cv_folds = 1,  # No additional CV inside this function
+    n_permutations = 0,
+    n_bootstraps = 0
+  )
+  
+  return(result)
+}
+
+# Then you can use this function with future_lapply to process data in chunks
+chunks <- split(1:nrow(X1_big), ceiling(seq_along(1:nrow(X1_big))/1000))
+
+chunk_results <- future.apply::future_lapply(
+  chunks,
+  function(idx) run_mbspls_with_bigmem(idx, X1_big, X2_big, X3_big, params),
+  future.seed = TRUE
+)
+```
+
+# Conclusion
+
+By leveraging the `future` framework, the `mbspls` package can scale from laptops to large HPC clusters without changes to your analysis code. This flexibility makes it easy to develop and test your analysis locally, then scale up to larger datasets and more extensive computations on an HPC environment.
+
+Remember to adjust the template and resources according to your specific cluster configuration and requirements.

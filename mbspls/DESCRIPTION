@@ -1,0 +1,44 @@
+Package: mbspls
+Type: Package
+Title: Multi-Block Sparse Partial Least Squares
+Version: 0.1.0
+Date: 2025-07-07
+Authors@R: 
+    person("Your", "Name", email = "your.email@example.com",
+           role = c("aut", "cre"))
+Description: Implementation of Multi-Block Sparse Partial Least Squares (MBSPLS) 
+    for integrative analysis of multiple data blocks. The package provides 
+    functionality for dimensionality reduction, feature selection, and 
+    correlation analysis between multiple high-dimensional datasets. It supports 
+    cross-validation, permutation testing, bootstrapping, and hyperparameter 
+    optimization with parallel processing capabilities.
+License: MIT + file LICENSE
+Encoding: UTF-8
+LazyData: true
+Roxygen: list(markdown = TRUE)
+RoxygenNote: 7.3.2
+Imports:
+    Rcpp (>= 1.0.9),
+    RcppArmadillo,
+    matrixStats,
+    future,
+    furrr,
+    foreach,
+    doParallel,
+    R.matlab,
+    vctrs,
+    progressr,
+    methods
+LinkingTo: 
+    Rcpp,
+    RcppArmadillo
+Suggests:
+    testthat (>= 3.0.0),
+    knitr,
+    rmarkdown,
+    future.batchtools,
+    ggplot2,
+    doRNG
+Config/testthat/edition: 3
+Config/parallel/backend: future
+VignetteBuilder: knitr

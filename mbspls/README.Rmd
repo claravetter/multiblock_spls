@@ -1,0 +1,128 @@
+---
+output: github_document
+---
+
+<!-- README.md is generated from README.Rmd. Please edit that file -->
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  fig.path = "man/figures/README-",
+  out.width = "100%"
+)
+```
+
+# mbspls
+
+<!-- badges: start -->
+<!-- badges: end -->
+
+The `mbspls` package implements Multi-Block Sparse Partial Least Squares (MBSPLS) 
+for the integrative analysis of multiple data blocks. This package is an R port of a 
+MATLAB implementation, optimized for performance and high-performance computing
+environments.
+
+## Installation
+
+You can install the development version of mbspls from [GitHub](https://github.com/) with:
+
+``` r
+# install.packages("devtools")
+devtools::install_github("username/mbspls")
+```
+
+## Example
+
+This is a basic example of using mbspls with a simple dataset:
+
+```{r example}
+library(mbspls)
+
+# Create synthetic multi-block data
+set.seed(123)
+n <- 100  # number of samples
+p1 <- 50  # features in block 1
+p2 <- 30  # features in block 2
+p3 <- 20  # features in block 3
+
+# Generate correlated blocks
+block1 <- matrix(rnorm(n * p1), n, p1)
+block2 <- matrix(rnorm(n * p2), n, p2)
+block3 <- matrix(rnorm(n * p3), n, p3)
+
+# Create a list of data blocks
+blocks <- list(
+  proteome = block1,
+  metabolome = block2,
+  clinical = block3
+)
+
+# Setup MBSPLS parameters
+params <- mbspls_setup(
+  sparsity = c(2, 2, 2),
+  num_components = 2,
+  convergence_threshold = 1e-5
+)
+
+# Fit MBSPLS model
+result <- mbspls_run(blocks, params)
+
+# Print summary
+summary(result)
+
+# Visualize results (if ggplot2 is available)
+if (requireNamespace("ggplot2", quietly = TRUE)) {
+  plot(result)
+}
+```
+
+## Features
+
+* Multi-block sparse PLS implementation
+* Cross-validation framework
+* Permutation testing for statistical validation
+* Bootstrap for stability assessment  
+* Parallel processing via the `future` framework
+* HPC integration with `future.batchtools`
+* Tools for importing MATLAB .mat files
+* Visualization of latent variables, loadings, and model performance
+
+## License
+
+This package is licensed under the MIT License.
+
+## Troubleshooting
+
+If you encounter errors when loading the package, try the following:
+
+1. Make sure you have all the required dependencies installed:
+
+```r
+install.packages(c("Rcpp", "RcppArmadillo", "matrixStats", "future", "furrr", 
+                  "foreach", "doParallel", "R.matlab", "vctrs", "progressr"))
+```
+
+2. If you see errors about functions not being found, try reinstalling the package from source:
+
+```r
+# Remove old installation
+remove.packages("mbspls")
+
+# Reinstall with build from source
+devtools::install_github("username/mbspls", build_vignettes = TRUE, force = TRUE)
+```
+
+3. For detailed debugging, you can use the development mode:
+
+```r
+# Load the package in development mode
+devtools::load_all("path/to/mbspls")
+```
+
+4. If you're getting errors with parallel processing, try using a sequential plan:
+
+```r
+library(future)
+plan(sequential)
+```
